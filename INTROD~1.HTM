@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivité avec l’IA pour l’Intelligence Économique - Premium Scrollytelling</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+
+
+
+<style>
+    /* CONFIGURATION ET IDENTITÉ VISUELLE */
+    :root {
+        --bg-black: #FFF8E1;
+        --brand-green: #ffbf00;
+        --pure-white: #06065b;
+        --muted-grey: #444444;
+        --font-main: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        background-color: var(--bg-black);
+        color: var(--pure-white);
+        font-family: var(--font-main);
+    }
+
+    /* CONTENEUR LEARNWORLDS (PLEIN ÉCRAN) */
+    #scrollytelling-wrapper {
+        height: 700px;
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        overflow-y: auto;
+        background-color: var(--bg-black);
+        scrollbar-width: thin;
+        scrollbar-color: var(--brand-green) #EEEEEE;
+    }
+
+    #scrollytelling-wrapper::-webkit-scrollbar { width: 6px; }
+    #scrollytelling-wrapper::-webkit-scrollbar-track { background: #EEEEEE; }
+    #scrollytelling-wrapper::-webkit-scrollbar-thumb { background: var(--brand-green); border-radius: 3px; }
+
+    /* GRILLE DE FOND PREMIUM */
+    .tech-grid {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image:
+            linear-gradient(rgba(6, 6, 91, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6, 6, 91, 0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* LIGNE DE PROGRESSION LATÉRALE */
+    .timeline-container {
+        position: fixed; /* Fixe pour rester en place pendant le défilement */
+        left: 3%;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background: rgba(6, 6, 91, 0.08);
+        z-index: 2;
+    }
+
+    .timeline-progress {
+        position: absolute;
+        left: 0; top: 0; width: 100%; height: 0%;
+        background: var(--brand-green);
+        box-shadow: 0 0 15px rgba(255, 191, 0, 0.8);
+        transition: height 0.2s ease-out;
+    }
+
+    /* INDICATEUR */
+    .progress-node {
+        position: absolute;
+        left: -5px;
+        bottom: 0;
+        width: 12px; height: 12px;
+        background: var(--brand-green);
+        border-radius: 50%;
+        box-shadow: 0 0 15px var(--brand-green);
+        transform: translateY(50%);
+    }
+
+    /* SECTIONS ET EFFET PREMIUM */
+    .scrolly-section {
+        min-height: 700px;
+        padding: 80px 2% 80px 8%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center; /* Centrage conforme aux captures */
+        text-align: center;
+        position: relative;
+        z-index: 3;
+    }
+
+    .content-block {
+        max-width: 1400px;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(60px) scale(0.98);
+        filter: blur(8px);
+        transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* ÉTAT ACTIF (À L’ENTRÉE DANS LA ZONE VISIBLE) */
+    .scrolly-section.is-active .content-block {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+
+    /* TYPOGRAPHIE BASÉE SUR LES CAPTURES */
+    .tech-tag {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: var(--brand-green);
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    h1, h2 {
+        font-size: 64px;
+        font-weight: 800;
+        line-height: 1.1;
+        color: var(--pure-white);
+        letter-spacing: -0.03em;
+        margin-bottom: 20px;
+    }
+
+    .highlight { color: var(--brand-green); }
+
+    .huge-number {
+        font-size: 180px;
+        font-weight: 800;
+        line-height: 0.85;
+        color: var(--pure-white);
+        margin-bottom: 15px;
+        letter-spacing: -0.05em;
+    }
+
+    p {
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--muted-grey);
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    p strong { color: var(--pure-white); }
+
+    /* ENCADRÉS D’IMPACT */
+    .impact-panel {
+        margin-top: 35px;
+        padding: 25px 30px;
+        background-color: rgba(255, 248, 225, 0.78);
+        border: 1px solid rgba(255, 191, 0, 0.35);
+        border-radius: 8px;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .impact-panel::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; width: 4px; height: 100%;
+        background: var(--brand-green);
+    }
+
+    .impact-panel .panel-title {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--brand-green);
+        margin-bottom: 10px;
+    }
+
+    .impact-panel p {
+        font-size: 16px;
+        color: var(--pure-white);
+        margin: 0;
+    }
+
+    /* RESPONSIVE DE BASE */
+    @media (max-width: 768px) {
+        h1, h2 { font-size: 42px; }
+        .huge-number { font-size: 100px; }
+        .scrolly-section { padding: 60px 30px 60px 80px; }
+        .timeline-container { left: 30px; }
+    }
+
+    /* INDICATEUR DE DÉFILEMENT (COUVERTURE) */
+    .scroll-indicator {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        opacity: 0;
+        animation: fadeInScroll 1s ease-in-out 1s forwards, bounceScroll 2s infinite;
+    }
+
+    .scroll-indicator span {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--pure-white);
+        opacity: 0.7;
+    }
+
+    .scroll-indicator svg {
+        width: 28px;
+        height: 28px;
+        fill: none;
+        stroke: var(--brand-green);
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    @keyframes fadeInScroll {
+        to { opacity: 1; }
+    }
+
+    @keyframes bounceScroll {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+        40% { transform: translateY(-10px) translateX(-50%); }
+        60% { transform: translateY(-5px) translateX(-50%); }
+    }
+</style>
+
+
+
+</head>
+<body>
+
+<div id="scrollytelling-wrapper">
+    <div class="tech-grid"></div>
+
+    <div class="timeline-container">
+        <div class="timeline-progress" id="timeline-progress">
+            <div class="progress-node"></div>
+        </div>
+    </div>
+
+    <!-- SECTION 1 : COUVERTURE -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">BRÈVE INTRODUCTION AU COURS</span>
+            <h1>Productivité avec <br>l’IA pour l’Intelligence Économique</h1>
+            <h2 style="font-size: 32px; color: var(--brand-green); margin-top: 10px; font-weight: 600;">Des résultats concrets dès demain.</h2>
+        </div>
+        <div class="scroll-indicator">
+            <span>Défiler vers le bas pour continuer</span>
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+    </section>
+
+    <!-- SECTION 2 : 70 % -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">DIAGNOSTIC DU QUOTIDIEN — INTELLIGENCE ÉCONOMIQUE</span>
+            <div class="huge-number">70%</div>
+            <h2 style="font-size: 48px;">de votre temps peut être absorbé par des <span class="highlight">tâches opérationnelles.</span></h2>
+            <p>Dans ce cours, vous apprendrez à déléguer à l’IA la recherche documentaire, la qualification des sources, l’analyse de données, la rédaction de livrables et la création de présentations afin de gagner du temps et de vous concentrer sur l’essentiel : interpréter les signaux, construire une lecture stratégique et éclairer la prise de décision.</p>
+        </div>
+    </section>
+
+    <!-- SECTION 3 : ASTERIA -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">ENVIRONNEMENT DE SIMULATION</span>
+            <h2>Cas fil rouge : <span class="highlight">Asteria Global Solutions</span></h2>
+            <p>Place à la pratique. Tout au long du cours, vous interviendrez chez <strong>Asteria Global Solutions</strong>, une entreprise internationale fictive qui souhaite renforcer son dispositif de veille et d’intelligence économique. Votre objectif sera d’appliquer l’IA étape par étape pour résoudre des situations professionnelles : rechercher et recouper l’information, qualifier les sources, détecter des signaux faibles, analyser les risques et les acteurs, préparer des décisions et industrialiser la production d’intelligence.</p>
+            <div class="impact-panel"><div class="panel-title">VOUS APPRENEZ EN FAISANT</div><p>Chaque défi résolu devient une solution concrète pour fiabiliser les sources, accélérer l’analyse, transformer l’information en intelligence exploitable et mieux étayer la prise de décision.</p></div>
+        </div>
+    </section>
+
+    <!-- SECTION 4 : DÉFI 1 -->
+    <section class="scrolly-section"><div class="content-block">
+        <span class="tech-tag">DÉFI 01</span><h2>Fini les <span class="highlight">réponses génériques.</span></h2>
+        <p>Vous n’aurez plus à réexpliquer le même contexte à l’IA à chaque nouvelle conversation. Vous construirez vos 7 fichiers de contexte adaptés à Asteria — identité, ton, règles d’intelligence économique et références — qui agiront comme une mémoire numérique de l’entreprise.</p>
+        <div class="impact-panel"><div class="panel-title">IMPACT CONCRET POUR L’INTELLIGENCE ÉCONOMIQUE</div><p>Vous produirez des analyses, synthèses, recommandations et contenus professionnels plus cohérents en quelques minutes, tout en réduisant fortement les réponses génériques de l’IA.</p></div>
+    </div></section>
+
+    <!-- SECTION 5 : DÉFI 2 -->
+    <section class="scrolly-section"><div class="content-block">
+        <span class="tech-tag">DÉFI 02</span><h2>Votre valeur réside dans <span class="highlight">l’interprétation</span>, pas dans la lecture de 200 pages.</h2>
+        <p>Transformez des heures de recherche manuelle en analyses structurées. Vous utiliserez le mode Deep Research comme un chercheur autonome capable d’explorer plusieurs sources, de recouper les informations et de documenter ses résultats.</p>
+        <div class="impact-panel"><div class="panel-title">IMPACT CONCRET POUR L’INTELLIGENCE ÉCONOMIQUE</div><p>Vous traiterez un cas de veille stratégique en explorant plusieurs sources, en recoupant les informations et en évaluant leur fiabilité, puis vous synthétiserez les résultats dans un rapport structuré prêt à éclairer une décision.</p></div>
+    </div></section>
+
+    <!-- SECTION 6 : DÉFIS 3 + 4 -->
+    <section class="scrolly-section"><div class="content-block">
+        <span class="tech-tag">DÉFIS 03 + 04</span><h2>Présentations, images et infographies avec <span class="highlight">votre identité de marque.</span></h2>
+        <p>Utilisez l’IA pour extraire les enseignements du diagnostic du dispositif de veille et d’intelligence économique d’Asteria et structurer le contenu. L’IA mettra ensuite automatiquement en forme la présentation et créera des visuels en respectant strictement l’identité de marque.</p>
+        <div class="impact-panel"><div class="panel-title">IMPACT CONCRET POUR L’INTELLIGENCE ÉCONOMIQUE</div><p>Vous transformez des analyses complexes en messages visuels clairs pour la direction : couverture de veille, fiabilité des sources, signaux faibles, risques, scénarios et priorités de décision.</p></div>
+    </div></section>
+
+    <!-- SECTION 7 : DÉFI 5 -->
+    <section class="scrolly-section"><div class="content-block">
+        <span class="tech-tag">DÉFI 05</span><h2>Préparation des réunions, IA en direct et <span class="highlight">comptes rendus automatisés.</span></h2>
+        <p>Vous mettrez en place un flux d’IA en trois temps : avant la réunion pour préparer l’agenda et les objections, pendant la réunion pour exploiter le contexte, puis après la réunion pour générer une synthèse, formaliser les décisions et attribuer les actions.</p>
+        <div class="impact-panel"><div class="panel-title">IMPACT CONCRET POUR L’INTELLIGENCE ÉCONOMIQUE</div><p>Vous réduisez fortement le travail administratif autour des réunions stratégiques et produisez des comptes rendus exécutifs centrés sur les faits établis, les risques, les arbitrages, les décisions et les prochaines actions.</p></div>
+    </div></section>
+
+    <!-- SECTION 8 : DÉFI 6 -->
+    <section class="scrolly-section"><div class="content-block">
+        <span class="tech-tag">DÉFI 06</span><h2>Automatisation de la <span class="highlight">veille et des analyses hebdomadaires.</span></h2>
+        <p>Vous ne perdrez plus des heures à croiser manuellement plusieurs sources et fichiers de suivi. Vous utiliserez l’IA pour auditer les données hebdomadaires du dispositif de veille, mettre en quarantaine les anomalies, recouper les signaux, calculer un score de performance, comparer les périodes et modéliser des scénarios. Vous visualiserez ensuite les résultats avec Python et Power BI.</p>
+        <div class="impact-panel"><div class="panel-title">IMPACT CONCRET POUR L’INTELLIGENCE ÉCONOMIQUE</div><p>Vous détectez plus tôt les défauts de traçabilité, les signaux insuffisamment recoupés, les écarts de performance et les risques émergents afin de prendre des décisions étayées par une intelligence plus fiable.</p></div>
+    </div></section>
+
+    <!-- SECTION 9 : DÉFI 7 -->
+    <section class="scrolly-section"><div class="content-block">
+        <span class="tech-tag">DÉFI 07</span><h2>Création d’<span class="highlight">agents, GPT et Gems.</span></h2>
+        <p>Plus besoin de copier-coller manuellement des prompts complexes à chaque interaction. Vous apprendrez à configurer des agents personnalisés avec des instructions système et des fichiers de référence préchargés pour vos workflows de veille et d’intelligence économique.</p>
+        <div class="impact-panel"><div class="panel-title">IMPACT CONCRET POUR L’INTELLIGENCE ÉCONOMIQUE</div><p>Vous rendez vos workflows de veille, d’analyse et de restitution plus reproductibles et plus faciles à déployer, afin de relancer en quelques clics les tâches récurrentes construites dans les défis précédents.</p></div>
+    </div></section>
+
+    <!-- SECTION 10 : CONCLUSION -->
+    <section class="scrolly-section"><div class="content-block">
+        <h1 class="highlight" style="font-size: 140px; margin-bottom: 0;">+300 HEURES</h1>
+        <h2 style="font-size: 42px; font-weight: 400;">Récupérez du temps utile chaque année.</h2>
+        <div style="margin-top: 40px; border-top: 1px solid rgba(255, 191, 0, 0.4); padding-top: 25px;"><p style="font-weight: 700; letter-spacing: 4px; color: var(--pure-white); font-size: 14px;">C’EST PARTI.</p></div>
+    </div></section>
+</div>
+
+<script>
+    function initScrollytelling() {
+        const wrapper = document.getElementById('scrollytelling-wrapper');
+        const sections = document.querySelectorAll('.scrolly-section');
+        const progressLine = document.getElementById('timeline-progress');
+
+        if (!wrapper || sections.length === 0) return;
+
+        // Configuration robuste de IntersectionObserver pour LearnWorlds
+        const observerOptions = {
+            root: wrapper,
+            rootMargin: '0px 0px -10% 0px',
+            threshold: 0.05
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(sec => observer.observe(sec));
+
+        // Activer immédiatement les sections visibles pour éviter un écran vide
+        sections.forEach((section, i) => {
+            if (i === 0 || section.getBoundingClientRect().top < wrapper.clientHeight) {
+                section.classList.add('is-active');
+            }
+        });
+
+        // Contrôle de la ligne de progression latérale
+        wrapper.addEventListener('scroll', () => {
+            const scrollTop = wrapper.scrollTop;
+            const scrollHeight = wrapper.scrollHeight - wrapper.clientHeight;
+            if (scrollHeight > 0) {
+                const progress = (scrollTop / scrollHeight) * 100;
+                progressLine.style.height = progress + '%';
+            }
+        });
+    }
+
+    // Exécution immédiate pour les plateformes LMS / injections dynamiques asynchrones
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initScrollytelling);
+    } else {
+        initScrollytelling();
+    }
+</script>
+
+</body>
+</html>

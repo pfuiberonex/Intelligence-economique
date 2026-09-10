@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Défi 2 - Deep Research - Business Case</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+    @font-face {
+        font-family: 'Google Sans';
+        src: local('Google Sans'), local('Open Sans'), local('Segoe UI'), sans-serif;
+    }
+
+    :root {
+        --font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        --accent: #ffbf00;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+        font-family: var(--font-family);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .simulator-wrapper {
+        text-align: left;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        height: 80vh;
+        min-height: 650px; 
+        max-height: 900px;
+        overflow: hidden;
+        border-top: 1px solid #333;
+        border-bottom: 1px solid #333;
+        margin: 0;
+        background-color: #131314;
+    }
+
+    .simulator-wrapper * { box-sizing: border-box; margin: 0; padding: 0; }
+    .hidden { display: none !important; }
+    .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+
+    /* ==========================================
+       1. INTERFAZ GEMINI
+       ========================================== */
+    #ui-gemini { background-color: #131314; color: #e3e3e3; }
+    #ui-gemini .sidebar { width: 280px; background-color: #1e1f20; display: flex; flex-direction: column; padding: 12px; z-index: 10; }
+    #ui-gemini .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 8px; margin-bottom: 20px; }
+    #ui-gemini .logo-area { display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 500; }
+    #ui-gemini .new-chat-btn { background-color: #1a1a1c; border: none; color: #c4c7c5; padding: 10px 16px; border-radius: 50px; display: flex; align-items: center; gap: 12px; margin-bottom: 16px; font-size: 16px; width: fit-content; cursor: pointer; }
+    #ui-gemini .menu-item { padding: 10px 12px; border-radius: 50px; display: flex; align-items: center; gap: 12px; color: #c4c7c5; font-size: 16px; cursor: pointer; }
+    #ui-gemini .menu-item.highlight-red { outline: 2px solid #e03131; background-color: #282a2c; color: #e3e3e3; }
+    #ui-gemini .section-title { font-size: 15px; color: #e3e3e3; font-weight: 500; margin: 20px 0 8px 16px; }
+    #ui-gemini .recent-item { padding: 8px 12px 8px 16px; border-radius: 50px; color: #c4c7c5; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+    #ui-gemini .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 2px; }
+    #ui-gemini .profile-area { display: flex; align-items: flex-start; gap: 12px; padding: 12px; margin-top: 8px; border-radius: 12px; }
+    #ui-gemini .avatar { width: 36px; height: 36px; background-color: #d81b60; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 500; color: white; }
+    
+    #ui-gemini .main-area { flex: 1; display: flex; flex-direction: column; align-items: center; background: radial-gradient(circle at 50% 40%, #191b22 0%, #131314 60%); position: relative; transition: padding-right 0.4s; }
+    #ui-gemini .chat-container { width: 100%; max-width: 900px; flex: 1; display: flex; flex-direction: column; padding: 40px 20px 20px 20px; }
+    #ui-gemini .greeting { font-size: 40px; font-weight: 400; margin: auto; color: #e3e3e3; text-align: center;}
+    
+    #ui-gemini .input-wrapper { width: 100%; max-width: 900px; padding: 0 20px 30px 20px; position: relative; }
+    #ui-gemini .input-box { background-color: #1e1f20; border-radius: 30px; padding: 16px 24px; display: flex; align-items: flex-end; gap: 16px; }
+    #ui-gemini .input-box textarea { flex: 1; background: transparent; border: none; color: #e3e3e3; font-size: 18px; outline: none; resize: none; height: 32px; font-family: var(--font-family);}
+    
+    #ui-gemini .gm-popup-menu { position: absolute; bottom: 85px; left: 24px; background-color: #1a1a1c; border-radius: 16px; padding: 8px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.5); display: none; flex-direction: column; z-index: 2000; min-width: 260px; border: 1px solid #333; }
+    #ui-gemini .popup-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #e3e3e3; font-size: 15px; }
+    #ui-gemini .popup-item.active-hover { background-color: #282a2c; }
+    #ui-gemini .popup-divider { height: 1px; background-color: #333; margin: 4px 0; }
+    #ui-gemini .flyout-menu { position: absolute; left: calc(100% + 4px); bottom: -8px; background-color: #1a1a1c; border-radius: 16px; padding: 8px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.5); display: none; flex-direction: column; min-width: 240px; border: 1px solid #333; }
+    
+    #ui-gemini .dr-active-layout { display: flex; flex-direction: column; gap: 16px; background-color: #1e1f20; border-radius: 24px; padding: 20px 24px; }
+    #ui-gemini .dr-badge { display: flex; align-items: center; gap: 6px; background-color: #282a2c; padding: 6px 16px; border-radius: 50px; font-size: 14px; color: #e3e3e3; font-weight: 500; }
+    #ui-gemini .dr-bottom-row { display: flex; gap: 12px; }
+    #ui-gemini .dr-action-btn { flex: 1; background-color: transparent; border: 1px solid #444; border-radius: 50px; padding: 12px; color: #e3e3e3; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 15px; }
+
+    /* ==========================================
+       2. INTERFAZ CHATGPT
+       ========================================== */
+    #ui-chatgpt { background-color: #212121; color: #ececec; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    #ui-chatgpt .sidebar { width: 260px; background-color: #171717; display: flex; flex-direction: column; padding: 12px; z-index: 10; border-right: 1px solid #333;}
+    #ui-chatgpt .new-chat-btn { display:flex; justify-content:space-between; align-items:center; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor:pointer;}
+    #ui-chatgpt .new-chat-btn:hover { background-color: #212121; }
+    #ui-chatgpt .menu-item { padding: 10px 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; color: #ececec; font-size: 14px; cursor: pointer; }
+    #ui-chatgpt .menu-item:hover { background-color: #212121; }
+    #ui-chatgpt .section-title { font-size: 12px; color: #666; font-weight: 600; margin: 20px 0 8px 12px; }
+    #ui-chatgpt .recent-item { padding: 10px 12px; border-radius: 8px; color: #ececec; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor:pointer;}
+    #ui-chatgpt .sidebar-bottom { margin-top: auto; padding: 12px; display:flex; align-items:center; gap:10px; border-radius:8px; cursor:pointer;}
+
+    #ui-chatgpt .main-area { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; transition: padding-right 0.4s; }
+    #ui-chatgpt .chat-container { width: 100%; max-width: 800px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+    #ui-chatgpt .greeting { font-size: 32px; font-weight: 600; color: #fff; }
+
+    #ui-chatgpt .input-wrapper { width: 100%; max-width: 800px; padding: 0 20px 40px 20px; position: relative; }
+    #ui-chatgpt .input-box { background-color: #2f2f2f; border-radius: 24px; padding: 14px 16px; display: flex; align-items: flex-end; gap: 12px; }
+    #ui-chatgpt .input-box textarea { flex: 1; background: transparent; border: none; color: #ececec; font-size: 16px; outline: none; resize: none; height: 28px; line-height: 28px; font-family: inherit; }
+    #ui-chatgpt .plus-btn { background: transparent; border: 1px solid #666; color: #ececec; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; flex-shrink: 0;}
+    #ui-chatgpt .plus-btn.active-hover { background-color: #424242; }
+    #ui-chatgpt .right-actions { display: flex; align-items: center; gap: 12px; color: #ececec; font-size: 14px; font-weight: 500;}
+    #ui-chatgpt .send-btn { width: 32px; height: 32px; border-radius: 50%; background-color: #666; display: flex; justify-content: center; align-items: center; color: #212121; }
+
+    /* Menú ChatGPT */
+    #ui-chatgpt .cg-popup-menu { position: absolute; bottom: 80px; left: 20px; background-color: #2f2f2f; border-radius: 16px; padding: 12px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.6); display: none; flex-direction: column; z-index: 2000; min-width: 320px; border: 1px solid #424242; }
+    #ui-chatgpt .popup-item { display: flex; align-items: center; gap: 14px; padding: 10px 16px; color: #ececec; font-size: 14.5px; cursor: pointer;}
+    #ui-chatgpt .popup-item.active-hover { background-color: #424242; border-radius: 8px; margin: 0 8px; padding: 10px 8px; }
+    #ui-chatgpt .popup-item.top-special { background-color: #424242; border-radius: 12px; margin: 0 12px 8px 12px; padding: 12px 14px; }
+    #ui-chatgpt .popup-item .desc { display: flex; align-items: center; gap: 8px;}
+    #ui-chatgpt .popup-item .desc b { font-weight: 500; }
+    #ui-chatgpt .popup-item .desc small { color: #999; font-size: 13px; font-weight: 400;}
+    #ui-chatgpt .icon-container { width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; flex-shrink: 0;}
+
+    /* Input Activo de Investigación Avanzada */
+    #ui-chatgpt .cg-active-input { display: flex; align-items: center; gap: 12px; width: 100%; background-color: #2f2f2f; border-radius: 30px; padding: 10px 16px; border: 1px solid #424242; }
+    #ui-chatgpt .cg-active-pill { display: flex; align-items: center; gap: 6px; color: #3b82f6; font-size: 16px; font-weight: 500;}
+    #ui-chatgpt .cg-active-input textarea { flex: 1; background: transparent; border: none; color: #ececec; font-size: 16px; outline: none; resize: none; height: 28px; line-height: 28px; font-family: inherit; margin-left: 4px; border-left: 1px solid #555; padding-left: 12px; }
+
+    /* ==========================================
+       3. INTERFAZ COPILOT
+       ========================================== */
+    #ui-copilot { background-color: #242424; color: #f5f5f5; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    #ui-copilot .sidebar { width: 260px; background-color: #1e1e1e; display: flex; flex-direction: column; padding: 16px 12px; border-right: 1px solid #333; z-index: 10; }
+    #ui-copilot .mode-toggle { display: flex; background-color: #141414; border-radius: 20px; padding: 4px; margin-bottom: 20px; }
+    #ui-copilot .mode-btn { flex: 1; text-align: center; padding: 6px 0; font-size: 13px; border-radius: 16px; color: #a0a0a0; font-weight: 500; }
+    #ui-copilot .mode-btn.active { background-color: #333; color: white; }
+    #ui-copilot .menu-item { padding: 10px 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; color: #a0a0a0; cursor: pointer; }
+    #ui-copilot .menu-item:hover { background-color: #2b2b2b; }
+    #ui-copilot .section-title { font-size: 11px; color: #707070; font-weight: 600; margin: 20px 0 8px 12px; }
+    #ui-copilot .recent-item { padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #a0a0a0;}
+    #ui-copilot .sidebar-bottom { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 10px 12px;}
+
+    #ui-copilot .main-area { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; transition: padding-right 0.4s; }
+    #ui-copilot .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; position: absolute; top: 0; left: 0; }
+    #ui-copilot .center-toggles { display: flex; background-color: #1a1a1a; border-radius: 8px; padding: 4px; border: 1px solid #333; }
+    
+    /* MODIFICADO PARA SCROLL */
+    #ui-copilot .chat-container { width: 100%; max-width: 800px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 80px 20px 20px 20px; min-height: 0; }
+    
+    #ui-copilot .greeting { font-size: 28px; font-weight: 500; color: #ffffff; text-align: center; }
+
+    #ui-copilot .input-wrapper { width: 100%; max-width: 800px; padding: 0 20px 30px 20px; position: relative; }
+    #ui-copilot .input-box { width: 100%; background-color: #2b2b2b; border: 1px solid #444; border-radius: 24px; padding: 14px 20px; display: flex; align-items: flex-end; gap: 14px; }
+    #ui-copilot .input-box textarea { flex: 1; background: transparent; border: none; color: #f5f5f5; font-size: 15px; outline: none; resize: none; height: 24px; line-height: 24px; }
+    #ui-copilot .plus-btn { color: #3b82f6; font-size: 24px; cursor: pointer; }
+    #ui-copilot .plus-btn.active-hover { color: #60a5fa; }
+    
+    #ui-copilot .cp-popup-menu { position: absolute; bottom: 80px; left: 20px; width: 280px; background-color: #242424; border-radius: 12px; padding: 8px; display: none; flex-direction: column; z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.6); border: 1px solid #444; }
+    #ui-copilot .popup-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: #f5f5f5; font-size: 14px; }
+    #ui-copilot .popup-item.active-hover { background-color: #333; }
+    #ui-copilot .popup-divider { height: 1px; background-color: #444; margin: 4px 0; }
+
+    #ui-copilot .cp-active-pill { display: flex; align-items: center; gap: 8px; background-color: #1a1a1a; border: 1px solid #333; color: #c4c7c5; font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 16px; margin-bottom: 8px; width: fit-content;}
+
+    /* Contenedor de Historial de Chat (Simulación) - MODIFICADO PARA SCROLL */
+    #cpChatHistory { width: 100%; flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 10px; padding-bottom: 40px; min-height: 0; scroll-behavior: smooth; }
+    #cpChatHistory::-webkit-scrollbar { width: 6px; }
+    #cpChatHistory::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+    
+    /* Estilos Tablas Copilot */
+    .cp-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 14px;
+        color: #e3e3e3;
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .cp-table th, .cp-table td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #333;
+    }
+    .cp-table th {
+        font-weight: 600;
+        color: #fff;
+        background-color: #242424;
+    }
+    .cp-table tr:last-child td {
+        border-bottom: none;
+    }
+    .cp-table tr:last-child {
+        font-weight: bold;
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* ==========================================
+       4. OVERLAY Y GUÍA FLOTANTE (Global)
+       ========================================== */
+        .guide-overlay {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(6, 6, 91, 0.18); backdrop-filter: blur(3px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 10000; transition: all 0.4s ease;
+    }
+    .guide-overlay.corner-mode { background-color: transparent; backdrop-filter: none; pointer-events: none; }
+    .guide-card {
+        background-color: #FFF8E1; border: 2px solid #06065b; border-radius: 24px; width: 90%; max-width: 650px; padding: 32px;
+        box-shadow: 0 10px 40px rgba(6, 6, 91, 0.18); display: flex; flex-direction: column; gap: 16px;
+        max-height: 85%; overflow: hidden; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: auto;
+        color: #444444;
+    }
+    .guide-overlay.corner-mode .guide-card {
+        position: absolute; top: 20px; right: 20px; left: auto; width: 420px;
+        max-height: calc(100% - 40px); padding: 24px; box-shadow: 0 15px 50px rgba(6, 6, 91, 0.26), 0 0 15px rgba(255, 191, 0, 0.18);
+    }
+
+    .paso-pill { display: inline-block; border: 1px solid #ffbf00; background: #ffbf00; color: #06065b; border-radius: 50px; padding: 4px 12px; font-size: 14px; width: fit-content; margin-bottom: 4px; }
+    .guide-title { font-size: 22px; font-weight: 500; color: #06065b; padding-bottom: 4px; flex-shrink: 0; }
+    .guide-content { line-height: 1.5; font-size: 15px; overflow-y: auto; flex-grow: 1; padding-right: 8px; color: #444444; }
+    .guide-content::-webkit-scrollbar { width: 6px; }
+    .guide-content::-webkit-scrollbar-thumb { background: #ffbf00; border-radius: 10px; }
+    .guide-content p { margin-bottom: 10px; }
+
+    .card-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; margin-top: 10px; }
+    .card-list-item { display: flex; gap: 10px; align-items: flex-start; }
+    .card-list-item .material-symbols-outlined { color: #B78900; font-variation-settings: 'FILL' 1; font-size: 20px; margin-top: 2px; }
+
+    .paso0-warning { background-color: #FFF8E1; color: #06065b; border: 1px solid #ffbf00; padding: 12px; border-radius: 12px; display: flex; gap: 10px; align-items: flex-start; margin-top: 10px; font-weight: 500; }
+
+    .prompt-box { background-color: #FFFFFF; border-left: 4px solid #ffbf00; padding: 12px; border-radius: 0 8px 8px 0; font-family: 'Consolas', monospace; font-size: 13px; white-space: pre-wrap; margin-top: 12px; color: #444444; }
+    .copy-btn { background-color: transparent; color: #06065b; border: 1px solid #ffbf00; padding: 6px 14px; border-radius: 50px; cursor: pointer; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; transition: 0.2s; }
+    .copy-btn:hover { background-color: rgba(255, 191, 0, 0.12); }
+
+    .guide-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 16px; border-top: 1px solid #EEEEEE; flex-shrink: 0; }
+    .nav-btn { background-color: transparent; color: #06065b; border: none; padding: 8px 16px; border-radius: 50px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; }
+    .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .nav-btn.primary { background-color: #ffbf00; color: #06065b; }
+    .nav-btn.primary:hover:not(:disabled) { background-color: #B78900; color: #06065b; }
+    .step-indicator { color: #444444; font-size: 13px; }
+    
+    .start-btn-container { text-align: center; margin-top: 30px; }
+
+    /* Cursor de simulación */
+    .cursor-sim {
+        width: 20px; height: 20px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="2"><path d="M5.5 2.5v19l5.5-5.5 3.5 7.5 3-1.5-3.5-7.5h6z"/></svg>');
+        background-size: cover; position: fixed; z-index: 10001; pointer-events: none;
+        transition: top 0.5s ease-in-out, left 0.5s ease-in-out; display: none;
+    }
+    
+    .split-layout-active { padding-right: 460px !important; }
+</style>
+</head>
+<body>
+
+<div class="simulator-wrapper" id="simulatorContainer">
+
+    <div class="cursor-sim" id="simCursor"></div>
+
+    <div id="ui-gemini" class="ui-layer hidden">
+       </div>
+
+    <div id="ui-chatgpt" class="ui-layer hidden">
+       </div>
+
+    <div id="ui-copilot" class="ui-layer">
+        <div class="sidebar">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; padding: 0 4px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z" fill="url(#paint0_linear)"/>
+                    <defs>
+                        <linearGradient id="paint0_linear" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#3b82f6"/><stop offset="0.5" stop-color="#10b981"/><stop offset="1" stop-color="#facc15"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <i class="ph ph-squares-four" style="font-size:20px; color:#a0a0a0; cursor:pointer;"></i>
+            </div>
+            <div class="mode-toggle"><div class="mode-btn active">Chat</div><div class="mode-btn">Cowork</div></div>
+            <div class="menu-item"><i class="ph ph-chat-circle-text" style="font-size:20px;"></i> Nouvelle conversation</div>
+            <div class="menu-item"><i class="ph ph-magnifying-glass" style="font-size:20px;"></i> Rechercher</div>
+            <div class="menu-item"><i class="ph ph-books" style="font-size:20px;"></i> Bibliothèque</div>
+            
+            <div class="section-title">Agents</div>
+            <div class="menu-item"><i class="ph ph-planet" style="font-size:20px;"></i> Chercheur</div>
+            <div class="menu-item"><i class="ph ph-chart-line-up" style="font-size:20px;"></i> Analyste</div>
+            <div class="menu-item"><i class="ph ph-calendar-check" style="font-size:20px;"></i> Agent de planification</div>
+            <div class="menu-item"><i class="ph ph-clipboard-text" style="font-size:20px;"></i> Enquêtes</div>
+            <div class="menu-item"><i class="ph ph-lock-key" style="font-size:20px;"></i> Nouvel agent</div>
+            <div class="menu-item"><i class="ph ph-dots-three" style="font-size:20px;"></i> Plus d’agents</div>
+            
+            <div class="section-title">Conversations</div>
+            <div class="recent-item" style="display:flex; align-items:center; gap:8px;"><i class="ph ph-caret-right"></i> Intelligence économique...</div>
+            
+            <div class="sidebar-bottom"><i class="ph ph-user" style="font-size:20px;"></i> M365 Copilot (Premium)</div>
+        </div>
+
+        <div class="main-area split-layout-active" id="cpMainArea">
+            <div class="top-bar">
+                <div class="center-toggles"><div style="padding:4px 12px; background:#2b2b2b; color:#3b82f6; border-radius:6px;"><i class="ph-fill ph-briefcase"></i></div></div>
+            </div>
+            <div class="chat-container">
+                <h1 class="greeting hidden" id="cpGreeting">Bonjour, je peux vous aider à analyser vos données...</h1>
+                
+                <div id="cpChatHistory">
+                    <div style="display:flex; justify-content:flex-end; margin-bottom: 24px;">
+                        <div style="background-color: #3b82f6; padding: 16px; border-radius: 12px; max-width: 85%; color: white;">
+                            <div class="cp-active-pill" style="margin-bottom: 8px; border:none; background:#1e3a8a; color:#fff;"><i class="ph-fill ph-planet"></i> Chercheur</div>
+                            <div id="cpMsgUserText" style="white-space: pre-wrap; font-size:14px; line-height: 1.5;">Agissez comme Responsable senior en intelligence économique chez Asteria Global Solutions. Votre mission consiste à réaliser une analyse approfondie de la compétitivité de notre offre de intelligence économique face à deux acteurs majeurs du marché européen : Sénégal et Côte d’Ivoire.
+
+OBJECTIF : comprendre pourquoi une entreprise internationale pourrait choisir l'une de ces solutions plutôt que notre offre Asteria Global Solutions, puis formuler un plan d'action à destination du Comité de direction.
+
+ÉTAPES DE RECHERCHE (naviguez, recoupez et triangulez les sources) :
+
+1. Perception réelle du marché : analysez les avis et retours publiés au cours des 6 derniers mois. Identifiez les motifs récurrents concernant la facilité d'utilisation, la gouvernance, la visualisation, la performance et l'adoption par les métiers.
+2. Analyse des offres : étudiez les pages produits, documentations et communications récentes de Sénégal et Côte d’Ivoire, notamment leurs fonctionnalités intelligence économique, analytics et IA.
+3. Benchmark économique 2026 : recherchez les modèles tarifaires, coûts de licence et principaux coûts de déploiement et d'exploitation disponibles publiquement.
+4. Signaux d'alerte : recherchez les changements de tarification, dépendances d'écosystème, complexités de migration, limites de gouvernance et difficultés d'adoption documentées.
+
+STRUCTURE DE LA SORTIE :
+A. Analyse SWOT croisée du Sénégal, de la Côte d’Ivoire et du Maroc.
+B. Côte d’Ivoire des attributs de proposition de valeur.
+C. 5 recommandations concrètes pour renforcer la compétitivité de Asteria Global Solutions.</div>
+                        </div>
+                    </div>
+                    
+                    <div id="cpMsgResponse" style="display:flex; gap: 16px; align-items: flex-start; margin-bottom: 24px;">
+                        <div style="width:30px; height:30px; border-radius:50%; background:linear-gradient(to bottom right, #3b82f6, #10b981); display:flex; justify-content:center; align-items:center; flex-shrink:0;">
+                             <i class="ph-bold ph-sparkle" style="color:white; font-size:16px;"></i>
+                        </div>
+                        <div style="background-color: transparent; padding: 0; max-width: 100%; line-height: 1.5; font-size: 15px;">
+                            <p style="font-weight:600;font-size:17px;margin-bottom:12px;color:#fff;">Analyse d’intelligence économique : Sénégal, Côte d’Ivoire et Maroc</p>
+                            <p style="font-weight:600;margin-bottom:8px;color:#fff;">Synthèse exécutive</p>
+                            <p style="margin-bottom:12px;color:#d4d4d4;">Le benchmark met en évidence trois logiques de valeur : intégration à un écosystème, profondeur de visualisation et capacité à gouverner les données tout en favorisant leur adoption. Asteria Global Solutions peut se différencier par la cohérence des indicateurs stratégiques, la traçabilité, l’adoption métier et la réduction du délai entre une question et une décision fiable.</p>
+                            <p style="margin-bottom:12px;color:#d4d4d4;">Les grandes plateformes disposent toutefois d’écosystèmes et de capacités très solides. La recommandation doit donc reposer sur des avantages démontrables et sur le coût total, plutôt que sur une prétendue supériorité universelle.</p>
+</div>
+                    </div>
+
+                    <div id="cpMsgUserText2-container" style="display:flex; justify-content:flex-end; margin-bottom: 24px;">
+                        <div style="background-color: #3b82f6; padding: 16px; border-radius: 12px; max-width: 85%; color: white;">
+                            <div id="cpMsgUserText2" style="white-space: pre-wrap; font-size:14px; line-height: 1.5;">Analysez le rapport que vous venez de générer. Identifiez 3 points pour lesquels l’information reste vague, manque de données chiffrées précises ou repose sur des sources contradictoires. Effectuez une nouvelle recherche approfondie exclusivement consacrée à ces 3 lacunes afin de rendre mon rapport au Comité de direction aussi robuste, traçable et défendable que possible.</div>
+                        </div>
+                    </div>
+
+                    <div id="cpMsgResponse2" style="display:flex; gap: 16px; align-items: flex-start; margin-bottom: 24px;">
+                        <div style="width:30px; height:30px; border-radius:50%; background:linear-gradient(to bottom right, #3b82f6, #10b981); display:flex; justify-content:center; align-items:center; flex-shrink:0;">
+                             <i class="ph-bold ph-sparkle" style="color:white; font-size:16px;"></i>
+                        </div>
+                        <div style="background-color: transparent; padding: 0; max-width: 100%; line-height: 1.5; font-size: 15px;">
+                            <p style="margin-bottom:12px;color:#d4d4d4;">La vérification approfondie a identifié trois zones à sécuriser avant décision :</p>
+                            <ol style="padding-left:20px;color:#d4d4d4;margin-bottom:12px;">
+                              <li style="margin-bottom:8px;"><b>Coût total :</b> distinguer prix de licence, administration, capacité, déploiement et accompagnement, en signalant les éléments non comparables.</li>
+                              <li style="margin-bottom:8px;"><b>Adoption :</b> séparer les retours qualitatifs des indicateurs mesurables et éviter de généraliser à partir de témoignages isolés.</li>
+                              <li style="margin-bottom:8px;"><b>Qualité et gouvernance de l’information et IA :</b> distinguer fonctionnalités documentées, conditions d’accès et maturité réelle d’usage.</li>
+                            </ol>
+</div>
+                    </div>
+
+                    <div id="cpMsgUserText3-container" style="display:flex; justify-content:flex-end; margin-bottom: 24px;">
+                        <div style="background-color: #3b82f6; padding: 16px; border-radius: 12px; max-width: 85%; color: white;">
+                            <div id="cpMsgUserText3" style="white-space: pre-wrap; font-size:14px; line-height: 1.5;">À partir de la recherche précédente sur le Sénégal, la Côte d’Ivoire et le Maroc, rédigez une recommandation exécutive destinée au Comité de direction de Asteria Global Solutions qui réponde directement aux points de différenciation et aux risques identifiés.
+
+L’objectif est de montrer pourquoi une organisation qui évalue plusieurs marchés prioritaires pourrait choisir Asteria Global Solutions lorsque ses priorités sont la gouvernance, l’adoption métier, l’intégration au système d’information et la création de valeur à partir des données.
+
+Dans la recommandation destinée au client, ne mentionnez pas explicitement Sénégal ni Côte d’Ivoire.
+
+Adoptez un ton professionnel, crédible et orienté décision. N’affirmez aucun avantage qui ne soit pas étayé par la recherche précédente.</div>
+                        </div>
+                    </div>
+
+                    <div id="cpMsgResponse3" style="display:flex; gap: 16px; align-items: flex-start; margin-bottom: 24px;">
+                        <div style="width:30px; height:30px; border-radius:50%; background:linear-gradient(to bottom right, #3b82f6, #10b981); display:flex; justify-content:center; align-items:center; flex-shrink:0;">
+                             <i class="ph-bold ph-sparkle" style="color:white; font-size:16px;"></i>
+                        </div>
+                        <div style="background-color: transparent; padding: 0; max-width: 100%; line-height: 1.5; font-size: 15px;">
+                            <p style="font-weight:600;font-size:17px;margin-bottom:12px;color:#fff;">Comment Asteria peut-elle transformer l’intelligence économique en avantage décisionnel ?</p>
+                            <p style="margin-bottom:12px;color:#d4d4d4;">Pour Asteria Global Solutions, l’enjeu est de transformer la veille et l’analyse des marchés en décisions d’expansion plus robustes, grâce à des sources traçables, des hypothèses explicites et des critères de décision partagés.</p>
+                            <ul style="padding-left:20px;color:#d4d4d4;margin-bottom:12px;">
+                              <li style="margin-bottom:6px;"><b>Qualité et gouvernance de l’information :</b> définitions, règles de calcul, responsabilités et sources structurées.</li>
+                              <li style="margin-bottom:6px;"><b>Utilité pour la décision :</b> priorité donnée à la clarté et au temps nécessaire pour obtenir une réponse exploitable.</li>
+                              <li style="margin-bottom:6px;"><b>Intégration aux processus de veille :</b> sources certifiées et traçabilité des transformations.</li>
+                              <li><b>Analyse et IA :</b> usages orientés vers une valeur mesurable et contrôlée.</li>
+                            </ul>
+</div>
+                    </div>
+
+                    <div id="cpMsgUserText4-container" class="hidden" style="display:flex; justify-content:flex-end; margin-bottom: 24px;">
+                        <div style="background-color: #3b82f6; padding: 16px; border-radius: 12px; max-width: 85%; color: white;">
+                            <div id="cpMsgUserText4" style="white-space: pre-wrap; font-size:14px; line-height: 1.5;"></div>
+                        </div>
+                    </div>
+
+                    <div id="cpMsgThinking4" class="hidden" style="display:flex; align-items:center; gap:10px; color:#a0a0a0; font-size:14px; margin-bottom: 24px;">
+                        <i class="ph ph-spinner-gap" style="animation: spin 1s linear infinite; font-size:20px;"></i> Génération du Business Case...
+                    </div>
+
+                    <div id="cpMsgResponse4" class="hidden" style="display:flex; gap: 16px; align-items: flex-start; margin-bottom: 24px;">
+                        <div style="width:30px; height:30px; border-radius:50%; background:linear-gradient(to bottom right, #3b82f6, #10b981); display:flex; justify-content:center; align-items:center; flex-shrink:0;">
+                             <i class="ph-bold ph-sparkle" style="color:white; font-size:16px;"></i>
+                        </div>
+                        <div style="background-color: transparent; padding: 0; max-width: 100%; line-height: 1.5; font-size: 15px;">
+                            <p style="font-weight:600;font-size:17px;margin-bottom:12px;color:#fff;">Synthèse exécutive : quantifier la valeur d’un dispositif d’intelligence économique structuré</p>
+                            <p style="margin-bottom:12px;color:#d4d4d4;">Sur la seule base du temps de préparation manuelle des rapports, l’objectif de réduction de 30 % représente <b>4 320 heures économisées par an</b>, soit une valeur de productivité de <b>259 200 €</b>. Face à un budget annuel supplémentaire de 180 000 €, le bénéfice net quantifiable atteint <b>79 200 €</b> et le ROI à 12 mois est de <b>44 %</b>. Ce calcul n’intègre volontairement aucun bénéfice non mesuré lié à la qualité des décisions, à la gouvernance ou à la réduction des erreurs.</p>
+
+                            <p style="font-weight:600;margin-top:20px;margin-bottom:8px;color:#fff;">1. Gain de productivité</p>
+                            <table class="cp-table">
+                              <tr><th>Élément</th><th>Calcul</th><th>Résultat</th></tr>
+                              <tr><td>Temps manuel actuel</td><td>120 utilisateurs × 10 h/mois</td><td>1 200 h/mois</td></tr>
+                              <tr><td>Temps économisé</td><td>1 200 h × 30 %</td><td>360 h/mois</td></tr>
+                              <tr><td>Valeur mensuelle</td><td>360 h × 60 €</td><td>21 600 €</td></tr>
+                              <tr><td>VALEUR ANNUELLE</td><td>21 600 € × 12</td><td>259 200 €</td></tr>
+                            </table>
+
+                            <p style="font-weight:600;margin-top:20px;margin-bottom:8px;color:#fff;">2. Scorecard d’attractivité des marchés</p>
+                            <table class="cp-table">
+                              <tr><th>Attribut</th><th>Sénégal</th><th>Côte d’Ivoire</th><th>Maroc</th></tr>
+                              <tr><td>Qualité et gouvernance de l’information</td><td>9</td><td>8</td><td>8</td></tr>
+                              <tr><td>Utilité pour la décision</td><td>8</td><td>9</td><td>8</td></tr>
+                              <tr><td>Intégration aux processus de veille</td><td>8</td><td>10</td><td>8</td></tr>
+                              <tr><td>Analyse / IA</td><td>7</td><td>9</td><td>9</td></tr>
+                              <tr><td>Lisibilité de l’investissement</td><td>8</td><td>7</td><td>7</td></tr>
+                              <tr><td>MOYENNE INDICATIVE</td><td>7,8</td><td>8,0</td><td>8,6</td></tr>
+                            </table>
+                            <p style="margin-bottom:12px;color:#d4d4d4;"><b>Limite :</b> cette scorecard est une aide à la décision, pas une mesure objective universelle. Les notes reposent en partie sur les hypothèses du cas pédagogique ; elles doivent être recalibrées avec des preuves terrain avant une décision réelle.</p>
+
+                            <p style="font-weight:600;margin-top:20px;margin-bottom:8px;color:#fff;">3. Analyse d’écart</p>
+                            <ul style="padding-left:20px;color:#d4d4d4;margin-bottom:12px;">
+                              <li style="margin-bottom:6px;"><b>Analyse / IA :</b> renforcer la collecte, le recoupement et l’exploitation des signaux stratégiques.</li>
+                              <li style="margin-bottom:6px;"><b>Intégration aux processus de veille :</b> formaliser les sources prioritaires, les responsabilités et les circuits de validation.</li>
+                              <li style="margin-bottom:6px;"><b>Adoption :</b> financer l’accompagnement, la formation et le suivi de l’utilisation des analyses dans les décisions.</li>
+                              <li><b>Qualité et gouvernance de l’information :</b> documenter les indicateurs, les sources, les responsables et les règles de qualité de l’information.</li>
+                            </ul>
+
+                            <p style="font-weight:600;margin-top:20px;margin-bottom:8px;color:#fff;">4. ROI à 12 mois</p>
+                            <table class="cp-table">
+                              <tr><th>Indicateur</th><th>Montant</th></tr>
+                              <tr><td>Gain annuel quantifiable</td><td>259 200 €</td></tr>
+                              <tr><td>Investissement annuel</td><td>180 000 €</td></tr>
+                              <tr><td>Bénéfice net</td><td>79 200 €</td></tr>
+                              <tr><td>ROI = bénéfice net / investissement</td><td>44 %</td></tr>
+                            </table>
+                            <p style="margin-bottom:12px;color:#d4d4d4;"><b>Bénéfices potentiels non intégrés au ROI :</b> amélioration de la qualité et de la traçabilité des indicateurs stratégiques, réduction des erreurs de reporting, décisions plus rapides et meilleure gouvernance. Ces effets sont plausibles mais ne doivent être monétisés qu’après définition d’indicateurs de mesure.</p>
+</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <div class="input-box" id="cpInputBox" style="flex-direction:column; align-items:flex-start;">
+                    <div style="display:flex; align-items:center; gap:14px; width:100%;">
+                        <i class="ph ph-plus plus-btn" id="cpAddBtn"></i>
+                        <textarea id="cpPromptInput" placeholder="Envoyer un message à Copilot" disabled></textarea>
+                        <i class="ph ph-microphone" style="color:#a0a0a0; font-size:20px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="guide-overlay corner-mode" id="guideOverlay">
+        <div class="guide-card">
+            <div class="paso-pill" id="guidePill">Étape 4</div>
+            <div class="guide-title" id="guideTitle">Créez un Business Case</div>
+            <div class="guide-content" id="guideContent">
+                </div>
+            <div class="guide-footer">
+                <div></div>
+                <span class="step-indicator" id="stepIndicator">4 / 4</span>
+                <button class="nav-btn primary" id="btnSiguiente">Créer le Business Case</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        let isAnimating = false;
+
+        const DOM = {
+            guideOverlay: document.getElementById('guideOverlay'),
+            btnSiguiente: document.getElementById('btnSiguiente'),
+            simCursor: document.getElementById('simCursor'),
+            uiCopilot: document.getElementById('ui-copilot'),
+            cpMainArea: document.getElementById('cpMainArea')
+        };
+
+        const promptPaso4 = `Agissez comme consultant senior en stratégie Data & intelligence économique. À partir du rapport précédent et des données opérationnelles ci-dessous, construisez un Business Case exécutif destiné au Comité de direction de Asteria Global Solutions.
+
+DONNÉES OPÉRATIONNELLES DE RÉFÉRENCE :
+- 120 collaborateurs impliqués dans la veille, l’analyse et la préparation des décisions internationales.
+- Coût interne moyen chargé : 60 € par heure.
+- Temps actuellement consacré à la collecte, consolidation et préparation manuelle des analyses récurrentes : 10 heures par utilisateur et par mois.
+- Objectif de réduction de ce temps grâce à une dispositif structuré d’intelligence économique : 30 %.
+- Budget annuel supplémentaire envisagé pour la dispositif de veille, les outils d’analyse et l’accompagnement des équipes : 180 000 €.
+- Horizon d’analyse : 12 mois.
+
+TRAVAUX À RÉALISER :
+1. Gain de productivité : calculez la valeur annuelle du temps économisé si le temps de préparation manuelle diminue de 30 %.
+2. Scorecard d’attractivité des marchés : créez une matrice de 1 à 10 comparant le Sénégal, la Côte d’Ivoire et le Maroc sur la gouvernance, l’adoption métier, l’intégration système d’information, les capacités analytics/IA et la lisibilité du coût total. Justifiez brièvement chaque score et indiquez lorsqu’il repose sur une hypothèse.
+3. Analyse d’écart : identifiez les investissements ou capacités supplémentaires nécessaires pour qu’Asteria Global Solutions sécurise son dispositif d’expansion et réduise ses principales lacunes informationnelles.
+4. ROI : calculez le ROI à 12 mois du budget de 180 000 € en utilisant uniquement le gain de productivité quantifiable ci-dessus. Présentez séparément les bénéfices potentiels non quantifiés afin de ne pas les intégrer artificiellement au ROI.
+
+STRUCTURE DE LA SORTIE :
+- Synthèse exécutive : pourquoi agir maintenant ?
+- Côte d’Ivoirex de données : format propre, prêt à être repris dans Excel.
+- Hypothèses et limites : distinguez clairement faits, données fournies et hypothèses.
+- Conclusion financière : bénéfice net annuel estimé et ROI à 12 mois.`;
+
+        // Contenu du guide pour le Business Case
+        let html = `
+            <p>Pour présenter cette recommandation au Comité de direction, traduisez maintenant les conclusions en données économiques.</p>
+            <p>Un Business Case doit distinguer les gains quantifiables des bénéfices potentiels qui ne disposent pas encore d’une mesure suffisamment robuste.</p>
+            <p>Ne présentez pas des impressions : présentez les chiffres, les hypothèses et leurs limites.</p>
+            <p>Copiez ce prompt :</p>
+            <div class="prompt-box" id="promptBoxText4">${promptPaso4}</div>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('promptBoxText4').innerText); alert('Prompt copié');">
+                Copier le prompt
+            </button>
+        `;
+        document.getElementById('guideContent').innerHTML = html;
+
+        // Positionner le chat à la fin pour afficher le contexte initial
+        const chatHistory = document.getElementById('cpChatHistory');
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        DOM.btnSiguiente.onclick = () => {
+            if(isAnimating) return;
+            animatePaso4();
+        };
+
+        function animatePaso4() {
+            isAnimating = true;
+            DOM.btnSiguiente.disabled = true;
+            DOM.btnSiguiente.innerText = "Génération...";
+            
+            // 1. Llenar el input con el prompt
+            const inputField = document.getElementById('cpPromptInput');
+            inputField.value = promptPaso4;
+            inputField.style.height = "100px";
+            
+            setTimeout(() => {
+                // 2. "Enviar" el mensaje
+                inputField.value = "";
+                inputField.style.height = "24px";
+                
+                document.getElementById('cpMsgUserText4').innerText = promptPaso4;
+                document.getElementById('cpMsgUserText4-container').classList.remove('hidden');
+                chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior: 'smooth' });
+                
+                // 3. Mostrar spinner "Pensando"
+                document.getElementById('cpMsgThinking4').classList.remove('hidden');
+                chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior: 'smooth' });
+
+                // 4. Esperar 1 segundo y mostrar respuesta final
+                setTimeout(() => {
+                    document.getElementById('cpMsgThinking4').classList.add('hidden');
+                    document.getElementById('cpMsgResponse4').classList.remove('hidden');
+                    chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior: 'smooth' });
+                    
+                    DOM.btnSiguiente.innerText = "Terminé";
+                    isAnimating = false;
+                    // Fin de la simulation
+                }, 1000);
+
+            }, 800);
+        }
+    });
+</script>
+</body>
+</html>

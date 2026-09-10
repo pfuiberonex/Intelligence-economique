@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fondements pratiques de l'IA - Introduction interactive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    /* CONFIGURACIÓN Y PALETA CORPORATIVA */
+    :root {
+    --bg-black: #FFF8E1;
+    --brand-green: #ffbf00;
+    --pure-white: #06065b;
+    --muted-grey: #444444;
+    --panel-bg: #EEEEEE;
+    --font-main: 'Plus Jakarta Sans', sans-serif;
+}
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        background-color: var(--bg-black);
+        color: var(--pure-white);
+        font-family: var(--font-main);
+    }
+
+    /* CONTENEDOR PARA LEARNWORLDS (FORZANDO PANTALLA COMPLETA) */
+    #scrollytelling-wrapper {
+        height: 700px;
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        overflow-y: auto;
+        background-color: var(--bg-black);
+        scrollbar-width: thin;
+        scrollbar-color: var(--brand-green) var(--panel-bg);
+    }
+
+    #scrollytelling-wrapper::-webkit-scrollbar { width: 6px; }
+    #scrollytelling-wrapper::-webkit-scrollbar-track { background: var(--panel-bg); }
+    #scrollytelling-wrapper::-webkit-scrollbar-thumb { background: var(--brand-green); border-radius: 3px; }
+
+    /* GRID PREMIUM DE FONDO */
+    .tech-grid {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image:
+linear-gradient(rgba(6, 6, 91, 0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(6, 6, 91, 0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* LÍNEA DE PROGRESO LATERAL */
+    .timeline-container {
+        position: fixed;
+        left: 3%;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background: rgba(6, 6, 91, 0.08);
+        z-index: 2;
+    }
+
+    .timeline-progress {
+        position: absolute;
+        left: 0; top: 0; width: 100%; height: 0%;
+        background: var(--brand-green);
+        box-shadow: 0 0 15px rgba(255, 191, 0, 0.8);
+        transition: height 0.2s ease-out;
+    }
+
+    /* NODO INDICADOR */
+    .progress-node {
+        position: absolute;
+        left: -5px;
+        bottom: 0;
+        width: 12px; height: 12px;
+        background: var(--brand-green);
+        border-radius: 50%;
+        box-shadow: 0 0 15px var(--brand-green);
+        transform: translateY(50%);
+    }
+
+    /* SECCIONES Y EFECTO PREMIUM */
+    .scrolly-section {
+        min-height: 700px;
+        padding: 80px 2% 80px 8%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        z-index: 3;
+    }
+
+    .content-block {
+        max-width: 1400px;
+        width: 100%;
+        opacity: 0;
+        transform: translateY(60px) scale(0.98);
+        filter: blur(8px);
+        transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* ESTADO ACTIVO (CUANDO ENTRA EN PANTALLA) */
+    .scrolly-section.is-active .content-block {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+
+    /* TIPOGRAFÍA */
+    .tech-tag {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: var(--brand-green);
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    h1, h2 {
+        font-size: 64px;
+        font-weight: 800;
+        line-height: 1.1;
+        color: var(--pure-white);
+        letter-spacing: -0.03em;
+        margin-bottom: 20px;
+    }
+
+    .highlight { color: var(--brand-green); }
+
+    .huge-number {
+        font-size: 180px;
+        font-weight: 800;
+        line-height: 0.85;
+        color: var(--pure-white);
+        margin-bottom: 15px;
+        letter-spacing: -0.05em;
+    }
+
+    p {
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--muted-grey);
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    p strong { color: var(--pure-white); }
+
+    /* CAJAS DE IMPACTO */
+    .impact-panel {
+        margin-top: 35px;
+        padding: 25px 30px;
+        background-color: rgba(255, 248, 225, 0.78);
+border: 1px solid rgba(255, 191, 0, 0.35);
+        border-radius: 8px;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .impact-panel::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; width: 4px; height: 100%;
+        background: var(--brand-green);
+    }
+
+    .impact-panel .panel-title {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--brand-green);
+        margin-bottom: 10px;
+    }
+
+    .impact-panel p {
+        font-size: 16px;
+        color: var(--pure-white);
+        margin: 0;
+    }
+
+    /* RESPONSIVE BÁSICO */
+    @media (max-width: 768px) {
+        h1, h2 { font-size: 42px; }
+        .huge-number { font-size: 100px; }
+        .scrolly-section { padding: 60px 30px 60px 80px; }
+        .timeline-container { left: 30px; }
+    }
+
+    /* INDICADOR DE SCROLL (PORTADA) */
+    .scroll-indicator {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        opacity: 0;
+        animation: fadeInScroll 1s ease-in-out 1s forwards, bounceScroll 2s infinite;
+    }
+
+    .scroll-indicator span {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--pure-white);
+        opacity: 0.7;
+    }
+
+    .scroll-indicator svg {
+        width: 28px;
+        height: 28px;
+        fill: none;
+        stroke: var(--brand-green);
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    @keyframes fadeInScroll {
+        to { opacity: 1; }
+    }
+
+    @keyframes bounceScroll {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+        40% { transform: translateY(-10px) translateX(-50%); }
+        60% { transform: translateY(-5px) translateX(-50%); }
+    }
+</style>
+</head>
+<body>
+
+<div id="scrollytelling-wrapper">
+    <div class="tech-grid"></div>
+
+    <div class="timeline-container">
+        <div class="timeline-progress" id="timeline-progress">
+            <div class="progress-node"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 1: PORTADA -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">BRÈVE INTRODUCTION AU COURS</span>
+            <h1>Fondements pratiques<br>de l'IA</h1>
+            <h2 style="font-size: 32px; color: var(--brand-green); margin-top: 10px; font-weight: 600;">Résultats, sécurité et discernement dès le premier défi.</h2>
+        </div>
+
+        <div class="scroll-indicator">
+            <span>Défiler vers le bas pour continuer</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 2: 7 DESAFÍOS -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">PARCOURS PRATIQUE</span>
+            <div class="huge-number">7</div>
+            <h2 style="font-size: 48px;">défis pour passer de la simple utilisation de l'IA à <span class="highlight">sa maîtrise stratégique.</span></h2>
+            <p>L'interroger, protéger vos données sensibles, détecter les hallucinations, gérer sa mémoire limitée, extraire l'information stratégique de PDF volumineux, concevoir de meilleurs prompts et gagner du temps lorsque la surabondance d'informations paralyse vos décisions.</p>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 3: CONTEXTO DEL CURSO -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">AVANT DE COMMENCER</span>
+            <h2>L'IA peut être votre <span class="highlight">copilote stratégique.</span><br>Mais la décision finale vous appartient.</h2>
+           
+            
+        </div>
+    </section>
+
+    <!-- SECCIÓN 4: DESAFÍO 0 -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">DÉFI 0 · INTERROGEZ L'IA</span>
+            <h2>N'acceptez pas la première réponse. <span class="highlight">Poussez l'IA à justifier son raisonnement.</span></h2>
+            <p>Vous apprendrez à transformer chaque interaction en un processus de validation croisée : exiger des justifications, identifier les biais cognitifs, solliciter des hypothèses alternatives et formuler des requêtes pour évaluer la fiabilité de l'information (ce qu'elle sait, ce qu'elle ignore et les données requises pour affiner son analyse).</p>
+           
+        </div>
+    </section>
+
+    <!-- SECCIÓN 5: DESAFÍO 1 -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">DÉFI 1 · SÉCURITÉ DES DONNÉES À L'ÈRE DE L'IA</span>
+            <h2>Protégez les <span class="highlight">actifs stratégiques de votre organisation.</span></h2>
+            <p>Vous découvrirez les risques liés à l'introduction d'informations confidentielles dans les outils d'IA et comment minimiser votre vulnérabilité. Vous apprendrez à sécuriser les configurations de ChatGPT, Gemini et Copilot, et à anonymiser vos données avant toute exploitation pour garantir le secret des affaires.</p>
+            
+        </div>
+    </section>
+
+    <!-- SECCIÓN 6: DESAFÍO 2 -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">DÉFI 2 · HALLUCINATIONS ET FAUSSES INFORMATIONS DE L'IA</span>
+            <h2>Une réponse peut sembler véridique tout en <span class="highlight">étant totalement erronée.</span></h2>
+            <p>La fluidité du discours ne garantit en rien sa véracité. Vous apprendrez à auditer les affirmations, à repérer le bruit informationnel, à exiger une hiérarchie des preuves et à recouper l'information (triangulation) avant de l'intégrer à une note de synthèse, une recommandation exécutive ou une prise de décision.</p>
+            
+        </div>
+    </section>
+
+    <!-- SECCIÓN 7: DESAFÍO 3 -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">DÉFI 3 · L'IA, UN ASSISTANT À LA MÉMOIRE LIMITÉE</span>
+            <h2>L'IA ne retient pas l'intégralité de vos échanges. <span class="highlight">Fournissez-lui le contexte stratégique manquant.</span></h2>
+            <p>Vous cernerez ses limites cognitives et apprendrez à maintenir au premier plan vos objectifs de recherche, vos données de cadrage, vos contraintes et le format exécutif attendu. Vous éviterez ainsi que l'analyse ne dérive et garantirez la rigueur méthodologique de vos enquêtes.</p>
+            
+        </div>
+    </section>
+
+    <!-- SECCIÓN 8: DESAFÍO 4 -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">DÉFI 4 · L'INFORMATION STRATÉGIQUE DANS LES PDF VOLUMINEUX</span>
+            <h2>Identifiez les signaux faibles sans avoir à <span class="highlight">éplucher chaque page.</span></h2>
+            <p>Vous apprendrez à interroger de longs documents (rapports géopolitiques, dossiers de Due Diligence, études sectorielles) pour localiser des données précises, cartographier des acteurs, extraire les enjeux clés et transformer cette masse d'informations en notes de renseignement exploitables pour vos comités de direction.</p>
+            
+        </div>
+    </section>
+
+    <!-- SECCIÓN 9: DESAFÍO 5 -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">DÉFI 5 · PROMPT INVERSÉ ET INGÉNIERIE DE REQUÊTES</span>
+            <h2>Laissez l'IA vous poser <span class="highlight">les bonnes questions.</span></h2>
+            <p>Vous appliquerez la méthode du prompt inversé : au lieu d'improviser une consigne vague, vous définirez l'objectif final (votre besoin en intelligence) et laisserez l'IA identifier le contexte géo-économique manquant. Ce dialogue structuré vous permettra de créer des requêtes précises, ciblées et prêtes à l'emploi opérationnel.</p>
+           
+        </div>
+    </section>
+
+    <!-- SECCIÓN 10: DESAFÍO 6 -->
+    <section class="scrolly-section">
+        <div class="content-block">
+            <span class="tech-tag">DÉFI 6 · GESTION DU TEMPS ET PARALYSIE PAR L'ANALYSE</span>
+            <h2>Optimisez votre cycle de décision. <span class="highlight">De l'intelligence à l'action.</span></h2>
+            <p>Vous utiliserez l'IA pour déconstruire des environnements complexes, évaluer des scénarios, hiérarchiser vos priorités et surmonter la "paralysie par l'analyse" face à la surabondance de données. L'IA facilitera vos cadres de décision agiles et l'élaboration de plans opérationnels, sans jamais se substituer à votre discernement.</p>
+            
+        </div>
+    </section>
+
+    <!-- SECCIÓN 11: CIERRE -->
+    <section class="scrolly-section">
+        <div class="content-block">
+<h2 style="font-size: 48px; font-weight: 400;">Acquérez de solides</h2>            
+<h1 class="highlight" style="font-size: clamp(58px, 8vw, 112px); margin-bottom: 0;">Fondements pratiques</h1>
+            <h2 style="font-size: 48px; font-weight: 400;">de l'IA.</h2>
+            <p>Interrogez avec méthode. Protégez vos actifs. Triangulez l'information. Conservez la maîtrise de la décision.</p>
+            <div style="margin-top: 40px; border-top: 1px solid rgba(255, 191, 0, 0.4); padding-top: 25px;">
+                <p style="font-weight: 700; letter-spacing: 4px; color: var(--pure-white); font-size: 14px;">COMMENCEZ LE DÉFI 0 : INTERROGEZ L'IA.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    function initScrollytelling() {
+        const wrapper = document.getElementById('scrollytelling-wrapper');
+        const sections = document.querySelectorAll('.scrolly-section');
+        const progressLine = document.getElementById('timeline-progress');
+
+        if (!wrapper || sections.length === 0) return;
+
+        // Configuración de IntersectionObserver a prueba de LearnWorlds
+        const observerOptions = {
+            root: wrapper,
+            rootMargin: '0px 0px -10% 0px',
+            threshold: 0.05
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(sec => observer.observe(sec));
+
+        // Forzar activación inmediata de las secciones visibles
+        sections.forEach((section, i) => {
+            if (i === 0 || section.getBoundingClientRect().top < wrapper.clientHeight) {
+                section.classList.add('is-active');
+            }
+        });
+
+        // Control de la línea de progreso lateral
+        wrapper.addEventListener('scroll', () => {
+            const scrollTop = wrapper.scrollTop;
+            const scrollHeight = wrapper.scrollHeight - wrapper.clientHeight;
+            if (scrollHeight > 0) {
+                const progress = (scrollTop / scrollHeight) * 100;
+                progressLine.style.height = progress + '%';
+            }
+        });
+    }
+
+    // Ejecución inmediata para plataformas LMS e inyecciones dinámicas asíncronas
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initScrollytelling);
+    } else {
+        initScrollytelling();
+    }
+</script>
+
+</body>
+</html>

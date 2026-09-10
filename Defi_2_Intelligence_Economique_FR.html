@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Défi 2 - Hallucinations et erreurs de l’IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<style>
+    :root {
+        /* Interfaz simulada de ChatGPT */
+        --bg-sidebar: #0d0d0d;
+        --bg-main: #171717;
+        --text-main: #ececec;
+        --text-muted: #b4b4b4;
+        --text-darker: #8e8e8e;
+        --accent: #19c37d;
+        --bg-input: #2f2f2f;
+        --bg-hover: #212121;
+        --bg-active: #2f2f2f;
+
+        /* Guide pédagogique - Branding Iberonex */
+        --guide-cream: #FFF8E1;
+        --guide-yellow: #ffbf00;
+        --guide-yellow-dark: #B78900;
+        --guide-navy: #06065b;
+        --guide-grey: #444444;
+        --guide-line: #EEEEEE;
+        --font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+        font-family: var(--font-family);
+    }
+
+    .chatgpt-simulator-wrapper {
+        text-align: left;
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        display: flex;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        height: 82vh;
+        min-height: 700px;
+        max-height: 940px;
+        overflow: hidden;
+        margin: 0;
+        border-top: 1px solid #333;
+        border-bottom: 1px solid #333;
+    }
+
+    .chatgpt-simulator-wrapper * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        font-size: 24px;
+    }
+
+    /* 75 % interfaz simulada / 25 % guía */
+    .chatgpt-app {
+        width: 75%;
+        min-width: 0;
+        display: flex;
+        background-color: var(--bg-main);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .guide-pane {
+        width: 25%;
+        min-width: 0;
+        padding: 18px;
+        background: #111111;
+        border-left: 1px solid #333;
+        display: flex;
+        position: relative;
+        z-index: 80;
+    }
+
+    /* --- SIDEBAR CHATGPT --- */
+    .sidebar {
+        width: 250px;
+        background-color: var(--bg-sidebar);
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        border-right: none;
+        z-index: 10;
+        flex-shrink: 0;
+    }
+
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 12px;
+        margin-bottom: 20px;
+    }
+
+    .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        color: #ffffff;
+    }
+
+    .menu-icon-btn,
+    .new-chat-btn,
+    .menu-item,
+    .recent-item {
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        transition: 0.2s;
+        color: var(--text-muted);
+    }
+
+    .menu-icon-btn:hover,
+    .menu-item:hover,
+    .recent-item:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-main);
+    }
+
+    .menu-icon-btn {
+        padding: 7px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .new-chat-btn {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: left;
+        background-color: var(--bg-hover);
+        color: #ffffff;
+        transition: 0.2s;
+        font-family: var(--font-family);
+    }
+
+    .new-chat-btn:hover { background-color: var(--bg-active); }
+    .new-chat-btn .material-symbols-outlined { color: var(--text-main); }
+
+    .menu-list { display: flex; flex-direction: column; gap: 2px; }
+
+    .menu-item {
+        padding: 10px 12px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .section-title {
+        font-size: 11px;
+        color: var(--text-darker);
+        font-weight: 600;
+        text-transform: uppercase;
+        margin: 24px 0 8px 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .recent-item {
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 400;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .recent-item.active-chat {
+        background-color: var(--bg-hover);
+        color: #ffffff;
+    }
+
+    .sidebar-bottom {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .profile-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .profile-area:hover { background-color: var(--bg-hover); }
+
+    .avatar {
+        width: 32px;
+        height: 32px;
+        background-color: #d81b60;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        color: white;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .profile-info { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+    .profile-name { font-size: 14px; color: #ffffff; font-weight: 500; }
+    .profile-location { font-size: 12px; color: var(--text-muted); }
+
+    /* --- ÁREA PRINCIPAL Y CHAT --- */
+    .main-area {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: var(--bg-main);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .chat-topbar {
+        width: 100%;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        flex-shrink: 0;
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+
+    .model-label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        color: #e8e8e8;
+    }
+
+    .chat-container {
+        width: 100%;
+        max-width: 820px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 18px 20px 24px;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+    }
+
+    .chat-container::-webkit-scrollbar { width: 7px; }
+    .chat-container::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+
+    .chat-message {
+        display: flex;
+        gap: 17px;
+        margin-bottom: 34px;
+        width: 100%;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .user-avatar,
+    .chatgpt-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .user-avatar {
+        background-color: #d81b60;
+        color: white;
+        font-weight: 600;
+        font-size: 17px;
+    }
+
+    .chatgpt-avatar {
+        background-color: transparent;
+        color: #ffffff;
+        padding: 3px;
+    }
+
+    .message-content {
+        flex: 1;
+        min-width: 0;
+        font-size: 15.5px;
+        line-height: 1.62;
+        color: var(--text-main);
+    }
+
+    .message-content p { margin-bottom: 12px; }
+    .message-content ul,
+    .message-content ol { margin-left: 22px; margin-bottom: 14px; }
+    .message-content li { margin-bottom: 7px; }
+    .message-content strong { color: #fff; }
+    .message-content h2 { font-size: 21px; color: #ffffff; margin: 4px 0 12px; line-height: 1.25; }
+    .message-content h3 { font-size: 17px; color: #ffffff; margin: 19px 0 8px; line-height: 1.3; }
+    .message-content h4 { font-size: 15.5px; color: #ffffff; margin: 14px 0 6px; }
+
+    .user-prompt-box {
+        background: #2f2f2f;
+        border-radius: 18px;
+        padding: 13px 16px;
+        color: #f0f0f0;
+        white-space: pre-wrap;
+    }
+
+    .report-shell {
+        border: 1px solid #343434;
+        border-radius: 14px;
+        padding: 18px;
+        background: #1b1b1b;
+        margin: 10px 0 16px;
+    }
+
+    .report-kicker {
+        color: #b7b7b7;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }
+
+    .report-meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 12px 0 4px;
+    }
+
+    .report-chip {
+        border: 1px solid #3b3b3b;
+        background: #242424;
+        color: #cccccc;
+        border-radius: 999px;
+        padding: 4px 9px;
+        font-size: 12px;
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        margin: 10px 0 15px;
+        border: 1px solid #383838;
+        border-radius: 10px;
+    }
+
+    .report-table,
+    .audit-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 580px;
+        background: #1d1d1d;
+    }
+
+    .report-table th,
+    .report-table td,
+    .audit-table th,
+    .audit-table td {
+        border-bottom: 1px solid #383838;
+        padding: 9px 11px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 13.5px;
+        line-height: 1.45;
+    }
+
+    .report-table th,
+    .audit-table th {
+        color: #ffffff;
+        background: #252525;
+        font-weight: 650;
+    }
+
+    .report-table tr:last-child td,
+    .audit-table tr:last-child td { border-bottom: none; }
+
+    .report-table .declared-total td {
+        color: #ffffff;
+        font-weight: 700;
+        background: #222222;
+    }
+
+    .report-note {
+        border-left: 3px solid #8e8e8e;
+        background: #222222;
+        padding: 11px 13px;
+        margin: 12px 0;
+        color: #d8d8d8;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .fake-source-list {
+        font-size: 13px;
+        color: #bcbcbc;
+        margin-top: 12px;
+        border-top: 1px solid #363636;
+        padding-top: 12px;
+    }
+
+    .audit-verdict {
+        border: 1px solid #a64040;
+        background: rgba(166, 64, 64, 0.12);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin: 8px 0 16px;
+    }
+
+    .audit-verdict strong { color: #ffb4b4; }
+
+    .severity {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.35px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .severity.critical { background: rgba(224, 49, 49, 0.18); color: #ff9c9c; border: 1px solid rgba(224, 49, 49, 0.48); }
+    .severity.high { background: rgba(255, 169, 77, 0.14); color: #ffd09b; border: 1px solid rgba(255, 169, 77, 0.42); }
+    .severity.medium { background: rgba(116, 192, 252, 0.13); color: #a9d9ff; border: 1px solid rgba(116, 192, 252, 0.38); }
+
+    .source-link {
+        color: #8ab4f8;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .source-link:hover { color: #b8d4ff; }
+
+    .audit-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px;
+        margin: 12px 0 16px;
+    }
+
+    .audit-summary-card {
+        border: 1px solid #383838;
+        background: #202020;
+        border-radius: 10px;
+        padding: 10px 11px;
+    }
+
+    .audit-summary-card .number {
+        display: block;
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+
+    .audit-summary-card .label { color: #bdbdbd; font-size: 12px; }
+
+    .reasoning-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background-color: #1a1a1a;
+        border: 1px solid #333;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-size: 15px;
+        color: var(--accent);
+        margin-bottom: 16px;
+        font-weight: 500;
+    }
+
+    .reasoning-box .material-symbols-outlined {
+        font-size: 20px;
+        animation: pulse 1s infinite alternate;
+    }
+
+    /* Input inferior */
+    .input-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 820px;
+        padding: 0 20px 22px;
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+
+    .input-box {
+        width: 100%;
+        background-color: var(--bg-input);
+        border: 1px solid transparent;
+        border-radius: 30px;
+        padding: 11px 15px;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        transition: 0.3s;
+        position: relative;
+        z-index: 10;
+    }
+
+    .input-box.paste-flash {
+    border-color: rgba(255, 191, 0, 0.9);
+    box-shadow: 0 0 0 4px rgba(255, 191, 0, 0.11);
+}
+
+    .input-box textarea {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-main);
+        font-size: 15.5px;
+        outline: none;
+        font-family: var(--font-family);
+        resize: none;
+        overflow-y: auto;
+        height: 25px;
+        max-height: 145px;
+        line-height: 23px;
+        padding: 1px 0;
+    }
+
+    .input-box textarea::-webkit-scrollbar { width: 6px; }
+    .input-box textarea::-webkit-scrollbar-thumb { background: #555; border-radius: 10px; }
+
+    .input-box .material-symbols-outlined { color: var(--text-main); }
+
+    .plus-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: transparent;
+        cursor: pointer;
+        transition: 0.2s;
+        flex-shrink: 0;
+    }
+
+    .plus-btn:hover,
+    .plus-btn.active { background-color: #444; }
+
+    .input-right-elements {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 0;
+    }
+
+    .alta-btn {
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        gap: 2px;
+        padding: 4px 7px;
+        border-radius: 8px;
+        transition: 0.2s;
+        white-space: nowrap;
+    }
+
+    .alta-btn:hover,
+    .alta-btn.active { background-color: #444; color: #fff; }
+
+    .send-btn {
+        background-color: #ffffff;
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        flex-shrink: 0;
+        transition: transform 0.15s ease, background-color 0.2s ease;
+    }
+
+    .send-btn:hover { transform: scale(1.04); }
+    .send-btn .material-symbols-outlined { color: #111111; font-size: 20px; }
+
+    .input-disclaimer {
+        color: #878787;
+        font-size: 10.5px;
+        text-align: center;
+        margin-top: 8px;
+    }
+
+    .paste-toast {
+        position: absolute;
+        right: 27px;
+        bottom: 77px;
+        background: #ffffff;
+        color: #171717;
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 12px;
+        font-weight: 650;
+        opacity: 0;
+        transform: translateY(8px);
+        pointer-events: none;
+        transition: 0.2s ease;
+        z-index: 30;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+    }
+
+    .paste-toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Menús desplegables del input */
+    .plus-menu {
+        position: absolute;
+        bottom: 100%;
+        left: 20px;
+        width: calc(100% - 40px);
+        margin-bottom: 10px;
+        background-color: #2f2f2f;
+        border-radius: 16px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        z-index: 50;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+        border: 1px solid #444;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.2s ease;
+    }
+
+    .plus-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    .plus-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        color: #fff;
+        font-size: 14px;
+    }
+
+    .plus-menu-item:hover { background-color: #404040; }
+    .plus-menu-item.featured { background-color: #383838; margin-bottom: 6px; border-radius: 12px; }
+    .menu-icon { width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+    .menu-text-main { font-weight: 500; }
+    .menu-text-sub { color: #aaa; font-weight: 400; margin-left: 12px; font-size: 13px; }
+    .plus-search { color: #888; padding: 12px 14px; font-size: 13px; margin-top: 8px; border-top: 1px solid #444; }
+
+    .alta-menu {
+        position: absolute;
+        bottom: 100%;
+        right: 56px;
+        width: 200px;
+        margin-bottom: 10px;
+        background-color: #2f2f2f;
+        border-radius: 16px;
+        padding: 8px;
+        z-index: 50;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+        border: 1px solid #444;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.2s ease;
+    }
+
+    .alta-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .alta-header { color: #aaa; font-size: 13px; padding: 8px 12px; font-weight: 500; }
+    .alta-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #fff; font-size: 14px; }
+    .alta-item:hover { background-color: #404040; }
+
+    /* --- GUÍA DIDÁCTICA IBERONEX --- */
+    .guide-card {
+        background-color: var(--guide-cream);
+        border: 2px solid var(--guide-navy);
+        border-radius: 24px;
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        padding: 24px;
+        box-shadow: 0 15px 50px rgba(6, 6, 91, 0.22), 0 0 15px rgba(255, 191, 0, 0.14);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        overflow: hidden;
+        color: var(--guide-grey);
+        pointer-events: auto;
+    }
+
+    .paso-pill {
+        display: inline-block;
+        border: 1px solid var(--guide-yellow);
+        background-color: var(--guide-yellow);
+        color: var(--guide-navy);
+        border-radius: 50px;
+        padding: 4px 12px;
+        font-size: 14px;
+        width: fit-content;
+        margin-bottom: 2px;
+        font-weight: 600;
+    }
+
+    .guide-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--guide-navy);
+        padding-bottom: 5px;
+        flex-shrink: 0;
+        line-height: 1.18;
+    }
+
+    .guide-content {
+        line-height: 1.56;
+        font-size: 16px;
+        overflow-y: auto;
+        flex-grow: 1;
+        padding-right: 8px;
+        color: var(--guide-grey);
+    }
+
+    .guide-content::-webkit-scrollbar { width: 6px; }
+    .guide-content::-webkit-scrollbar-thumb { background: var(--guide-yellow); border-radius: 10px; }
+    .guide-content p { margin-bottom: 12px; }
+    .guide-content strong { color: var(--guide-navy); }
+
+    .challenge-label {
+        color: var(--guide-yellow-dark);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 11px;
+    }
+
+    .guide-subheading {
+        color: var(--guide-navy);
+        font-size: 18px;
+        font-weight: 700;
+        margin: 17px 0 8px;
+        line-height: 1.25;
+    }
+
+    .card-list {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+        margin: 12px 0 16px;
+    }
+
+    .card-list-item {
+        display: flex;
+        gap: 11px;
+        align-items: flex-start;
+    }
+
+    .card-list-item .material-symbols-outlined {
+        color: var(--guide-yellow-dark);
+        font-variation-settings: 'FILL' 1;
+        font-size: 23px;
+        margin-top: 1px;
+        flex-shrink: 0;
+    }
+
+    .card-list-item span:last-child {
+        color: var(--guide-navy);
+        font-size: 15.5px;
+        line-height: 1.5;
+    }
+
+    .paso0-warning {
+        background-color: var(--guide-cream);
+        color: var(--guide-navy);
+        border: 1px solid var(--guide-yellow);
+        padding: 14px;
+        border-radius: 12px;
+        display: flex;
+        gap: 11px;
+        align-items: flex-start;
+        margin-top: 10px;
+        font-weight: 500;
+    }
+
+    .paso0-warning .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1;
+        font-size: 25px;
+        flex-shrink: 0;
+        color: var(--guide-yellow-dark);
+    }
+
+    .prompt-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--guide-navy);
+        font-weight: 700;
+        margin-top: 16px;
+    }
+
+    .prompt-label .material-symbols-outlined { color: var(--guide-yellow-dark); }
+
+    .prompt-box {
+        background-color: #FFFFFF;
+        border-left: 4px solid var(--guide-yellow);
+        padding: 15px;
+        border-radius: 0 12px 12px 0;
+        font-family: Consolas, 'Courier New', monospace;
+        font-size: 13.5px;
+        white-space: pre-wrap;
+        margin-top: 10px;
+        color: var(--guide-grey);
+        line-height: 1.5;
+        border-top: 1px solid var(--guide-line);
+        border-right: 1px solid var(--guide-line);
+        border-bottom: 1px solid var(--guide-line);
+    }
+
+    .copy-btn {
+        background-color: transparent;
+        color: var(--guide-navy);
+        border: 1px solid var(--guide-yellow);
+        padding: 6px 14px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 11px;
+        font-family: var(--font-family);
+        transition: 0.2s;
+    }
+
+    .copy-btn:hover { background-color: rgba(255, 191, 0, 0.12); }
+
+    .guide-footer {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        margin-top: 8px;
+        padding-top: 14px;
+        border-top: 1px solid var(--guide-line);
+        flex-shrink: 0;
+    }
+
+    .nav-btn {
+        background-color: transparent;
+        color: var(--guide-navy);
+        border: none;
+        padding: 9px 14px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s;
+        font-family: var(--font-family);
+        line-height: 1.2;
+    }
+
+    .nav-btn:hover:not(:disabled) { background-color: rgba(255, 191, 0, 0.12); }
+    .nav-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .nav-btn.primary { background-color: var(--guide-yellow); color: var(--guide-navy); }
+    .nav-btn.primary:hover:not(:disabled) { background-color: #f2b700; }
+
+    .step-indicator {
+        color: var(--guide-grey);
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    /* Cursor simulado */
+    .sim-cursor {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 28px;
+        height: 36px;
+        z-index: 3000;
+        pointer-events: none;
+        opacity: 0;
+        transform: translate3d(0, 0, 0);
+        transition-property: transform, opacity;
+        transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+        filter: drop-shadow(0 3px 4px rgba(0,0,0,0.55));
+    }
+
+    .sim-cursor.visible { opacity: 1; }
+    .sim-cursor svg { width: 100%; height: 100%; display: block; }
+
+    .sim-cursor::after {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(25, 195, 125, 0.9);
+        border-radius: 50%;
+        left: 2px;
+        top: 2px;
+        opacity: 0;
+        transform: scale(0.4);
+    }
+
+    .sim-cursor.clicking::after { animation: cursorClick 0.4s ease-out; }
+
+    .hidden { display: none !important; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+        from { opacity: 0.45; }
+        to { opacity: 1; }
+    }
+
+    @keyframes cursorClick {
+        0% { opacity: 0.9; transform: scale(0.35); }
+        100% { opacity: 0; transform: scale(1.35); }
+    }
+
+    @media (max-width: 1180px) {
+        .sidebar { width: 210px; }
+        .guide-card { padding: 19px; }
+        .guide-title { font-size: 21px; }
+        .guide-content { font-size: 14.5px; }
+        .card-list-item span:last-child { font-size: 14px; }
+        .prompt-box { font-size: 12.5px; }
+        .chat-container, .input-wrapper { max-width: 720px; }
+    }
+
+    @media (max-width: 930px) {
+        .sidebar { display: none; }
+        .chatgpt-app { width: 68%; }
+        .guide-pane { width: 32%; padding: 12px; }
+        .guide-card { border-radius: 18px; padding: 16px; }
+        .guide-title { font-size: 19px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="chatgpt-simulator-wrapper" id="simulatorWrapper">
+    <div class="chatgpt-app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-area">ChatGPT</div>
+                <div class="menu-icon-btn"><span class="material-symbols-outlined" style="font-size:22px;">right_panel_close</span></div>
+            </div>
+
+            <button class="new-chat-btn" type="button">
+                <span class="material-symbols-outlined" style="font-size:18px;color:white;">edit_square</span>
+                Nouvelle conversation
+            </button>
+
+            <div class="menu-list">
+                <div class="menu-item"><span class="material-symbols-outlined" style="font-size:18px;">search</span>Rechercher dans les conversations</div>
+                <div class="menu-item"><span class="material-symbols-outlined" style="font-size:18px;">library_books</span>Bibliothèque</div>
+                <div class="menu-item"><span class="material-symbols-outlined" style="font-size:18px;">schedule</span>Planifiées</div>
+                <div class="menu-item"><span class="material-symbols-outlined" style="font-size:18px;">apps</span>Applications</div>
+            </div>
+
+            <div class="section-title">Épinglé</div>
+            <div class="recent-item">Audit de notes d’intelligence avec l’IA</div>
+
+            <div class="section-title">Conversations</div>
+            <div class="recent-item active-chat">Analyse marché Afrique–Europe</div>
+            <div class="recent-item">Vérification des chiffres et des sources</div>
+            <div class="recent-item">Risques et validation humaine</div>
+
+            <div class="sidebar-bottom">
+                <div class="profile-area">
+                    <div class="avatar">U</div>
+                    <div class="profile-info">
+                        <div class="profile-name">Participant au programme</div>
+                        <div class="profile-location">France</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main class="main-area" id="mainArea">
+            <div class="chat-topbar">
+                <div class="model-label">ChatGPT <span class="material-symbols-outlined" style="font-size:17px;">keyboard_arrow_down</span></div>
+                <span class="material-symbols-outlined" style="font-size:20px;">more_horiz</span>
+            </div>
+
+            <div class="chat-container" id="chatContainer">
+                <div class="chat-message initial-message">
+                    <div class="user-avatar">U</div>
+                    <div class="message-content">
+                        <div class="user-prompt-box">Prépare une note exécutive d’intelligence économique pour le comité de direction d’Asteria Industries, qui étudie le développement d’une activité de solutions énergétiques au Sénégal et, à terme, en Afrique de l’Ouest. Analyse l’attractivité du marché, les principaux acteurs, les flux commerciaux avec l’Europe, les risques réglementaires, les partenaires potentiels et les recommandations d’entrée sur le marché. Soyez conclusif et appuyez-vous sur des données de marché.</div>
+                    </div>
+                </div>
+
+                <div class="chat-message initial-message" id="initialReportMessage">
+                    <div class="chatgpt-avatar" aria-label="ChatGPT">
+                        <svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor" aria-hidden="true"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A6.0651 6.0651 0 0 0 19.0192 19.818a5.9847 5.9847 0 0 0 3.9977-2.9001 6.0462 6.0462 0 0 0-.735-7.0968Z"/></svg>
+                    </div>
+                    <div class="message-content">
+                        <p>J’ai préparé une note d’intelligence économique orientée vers la décision. La conclusion est claire : Asteria Industries dispose d’une fenêtre d’opportunité favorable pour accélérer son développement au Sénégal et structurer ensuite une approche régionale.</p>
+                        <div class="report-shell">
+                            <div class="report-kicker">Note pour le comité de direction</div>
+                            <h2>Analyse d’opportunité Sénégal–Afrique de l’Ouest et recommandation d’entrée sur le marché</h2>
+                            <p><strong>Entreprise :</strong> Asteria Industries</p>
+                            <div class="report-meta"><span class="report-chip">Confiance de l’analyse : 96 %</span><span class="report-chip">Horizon : 24 mois</span><span class="report-chip">Périmètre : Sénégal et Afrique de l’Ouest</span></div>
+                            <h3>1. Attractivité du marché</h3>
+                            <p>La demande adressable est soutenue par les besoins d’équipement, les investissements énergétiques et la recherche de solutions de performance. L’estimation consolidée repose sur les segments suivants :</p>
+                            <div class="table-wrap"><table class="report-table"><thead><tr><th>Segment</th><th>Valeur estimée (M€)</th><th>Lecture stratégique</th></tr></thead><tbody>
+                            <tr><td>Industrie et infrastructures</td><td>420</td><td>Demande structurée et appels d’offres</td></tr><tr><td>Services énergétiques</td><td>360</td><td>Partenariats et contrats récurrents</td></tr><tr><td>Solutions pour PME</td><td>310</td><td>Marché fragmenté, potentiel de réseau</td></tr><tr><td>Projets territoriaux</td><td>240</td><td>Coopérations public-privé</td></tr><tr><td>Services de maintenance</td><td>190</td><td>Revenus complémentaires</td></tr><tr class="declared-total"><td>Total déclaré</td><td>2 040</td><td>Marché adressable consolidé</td></tr></tbody></table></div>
+                            <h3>2. Investissement initial et retour attendu</h3>
+                            <div class="table-wrap"><table class="report-table"><thead><tr><th>Poste</th><th>Coût annuel</th></tr></thead><tbody><tr><td>Études, veille et due diligence</td><td>48 000 €</td></tr><tr><td>Développement du réseau de partenaires</td><td>27 000 €</td></tr><tr><td>Implantation commerciale et support local</td><td>36 000 €</td></tr><tr class="declared-total"><td>Investissement total déclaré</td><td>96 000 €</td></tr></tbody></table></div>
+                            <ul><li><strong>Marge annuelle additionnelle estimée :</strong> 180 000 €.</li><li><strong>ROI de la première année :</strong> 196 %.</li><li><strong>Délai de retour sur investissement :</strong> 4,8 mois.</li></ul>
+                            <h3>3. Validation du marché</h3>
+                            <p>Selon l’<strong>« Observatoire panafricain des investissements énergétiques 2025 »</strong>, 78 % des entreprises industrielles d’Afrique de l’Ouest auraient augmenté de plus de 20 % leurs investissements dans les solutions d’efficacité énergétique. Cette dynamique confirmerait un marché régional homogène et immédiatement accessible.</p>
+                            <p>Par ailleurs, l’<strong>Institut euro-africain de compétitivité territoriale</strong> conclurait dans son rapport <em>Énergie et performance des entreprises 2025</em> qu’une implantation au Sénégal augmente en moyenne de 47 % les chances de réussite commerciale dans l’ensemble de l’Afrique de l’Ouest, indépendamment du secteur.</p>
+                            <h3>4. Cadre réglementaire</h3>
+                            <p>La <strong>Directive CEDEAO 18/2024 sur l’agrément unique des prestataires énergétiques</strong> imposerait aux entreprises étrangères de demander un agrément régional unique avant toute activité commerciale, agrément qui serait automatiquement valable dans tous les États membres pendant cinq ans.</p>
+                            <div class="report-note">Asteria Industries pourrait donc couvrir toute l’Afrique de l’Ouest avec une seule procédure d’agrément réalisée au Sénégal.</div>
+                            <h3>5. Recommandations stratégiques</h3><ol>
+                            <li>Lancer immédiatement une implantation commerciale complète sur la base des estimations de marché présentées, sans phase pilote supplémentaire.</li>
+                            <li>Considérer les données observées au Sénégal comme représentatives de l’ensemble de l’Afrique de l’Ouest afin d’accélérer la décision régionale.</li>
+                            <li>Privilégier les sources européennes disponibles en anglais ou en français, jugées plus faciles à comparer, et utiliser les sources locales uniquement pour confirmer les conclusions principales.</li>
+                            <li>Classer comme partenaires prioritaires les acteurs les plus visibles dans les résultats de recherche, leur présence numérique constituant un indicateur suffisant de leur influence réelle.</li>
+                            <li>Automatiser la présélection des partenaires à partir d’un score unique combinant visibilité, taille apparente et nombre de mentions, sans revue humaine systématique.</li></ol>
+                            <h3>6. Conclusion</h3><p>L’opportunité est économiquement solide, réglementairement simple et régionalement réplicable. Il est recommandé d’approuver l’investissement et d’engager rapidement le déploiement, sans phase complémentaire de vérification.</p>
+                            <div class="fake-source-list"><strong>Sources citées par la note :</strong><br>Observatoire panafricain des investissements énergétiques, <em>Baromètre 2025</em> · Directive CEDEAO 18/2024 · Institut euro-africain de compétitivité territoriale, <em>Énergie et performance des entreprises 2025</em>.</div>
+                        </div>
+                        <p>Souhaitez-vous que je transforme cette note en une présentation de dix diapositives pour le comité de direction ?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <div class="plus-menu" id="plusDropdown">
+                    <div class="plus-menu-item featured">
+                        <div class="menu-icon"><span class="material-symbols-outlined">attach_file</span></div>
+                        <div><span class="menu-text-main">Ajouter des photos et des fichiers</span></div>
+                    </div>
+                    <div class="plus-menu-item">
+                        <div class="menu-icon" style="color:#4da6ff;"><span class="material-symbols-outlined">language</span></div>
+                        <div><span class="menu-text-main">Recherche sur le Web</span><span class="menu-text-sub">Actualités et informations en temps réel</span></div>
+                    </div>
+                    <div class="plus-menu-item">
+                        <div class="menu-icon" style="color:#4da6ff;"><span class="material-symbols-outlined">biotech</span></div>
+                        <div><span class="menu-text-main">Recherche approfondie</span><span class="menu-text-sub">Obtenir un rapport détaillé</span></div>
+                    </div>
+                    <div class="plus-search">Saisissez du texte pour rechercher des outils, fichiers et fonctionnalités</div>
+                </div>
+
+                <div class="alta-menu" id="altaDropdown">
+                    <div class="alta-header">Raisonnement</div>
+                    <div class="alta-item">Instantané</div>
+                    <div class="alta-item">Intermédiaire</div>
+                    <div class="alta-item">Élevé <span class="material-symbols-outlined" style="font-size:18px;">check</span></div>
+                    <div class="alta-item">GPT-5.5</div>
+                </div>
+
+                <div class="paste-toast" id="pasteToast">Prompt collé</div>
+
+                <div class="input-box" id="mainInputBox">
+                    <div class="plus-btn" id="plusBtnTrigger"><span class="material-symbols-outlined">add</span></div>
+                    <textarea id="promptInput" placeholder="Posez votre question" disabled></textarea>
+                    <div class="input-right-elements">
+                        <div class="alta-btn" id="altaBtnTrigger">Élevé <span class="material-symbols-outlined" style="font-size:18px;">keyboard_arrow_down</span></div>
+                        <span class="material-symbols-outlined" style="font-size:21px;color:#b4b4b4;">mic</span>
+                        <button class="send-btn" id="sendButton" type="button" aria-label="Envoyer">
+                            <span class="material-symbols-outlined" id="sendIcon">graphic_eq</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-disclaimer">ChatGPT peut faire des erreurs. Vérifiez les informations importantes.</div>
+            </div>
+        </main>
+    </div>
+
+    <aside class="guide-pane" aria-label="Guide pédagogique">
+        <div class="guide-card">
+            <div class="paso-pill" id="guidePill">Défi 2 - Étape 1 sur 2</div>
+            <div class="guide-title" id="guideTitle">Vérifiez les sources</div>
+            <div class="guide-content" id="guideContent"></div>
+            <div class="guide-footer">
+                <span class="step-indicator" id="stepIndicator">1 / 2</span>
+                <button class="nav-btn primary" id="btnSuivant" type="button">J’ai vérifié les informations et les sources</button>
+            </div>
+        </div>
+    </aside>
+
+    <div class="sim-cursor" id="simCursor" aria-hidden="true">
+        <svg viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 2.5V31.5L10.8 24.1L16.1 36.3L21.4 33.9L16.3 22.2H27.8L3 2.5Z" fill="#ffffff" stroke="#111111" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const auditPrompt = `Agissez comme un analyste senior en intelligence économique chargé de vérifier une note avant sa diffusion. Auditez strictement le document ci-dessus et vérifiez en particulier :
+
+1) les données numériques et les calculs qui ne sont pas cohérents,
+
+2) les réglementations, institutions, études ou sources qui pourraient ne pas exister,
+
+3) les biais méthodologiques : généralisation abusive, sélection déséquilibrée des sources, confusion entre visibilité et influence, corrélation présentée comme causalité,
+
+4) toute information présentée comme factuelle qui n’est pas suffisamment étayée.
+
+Soyez très exigeant. Signalez chaque erreur, expliquez pourquoi elle pose problème et indiquez le niveau de preuve nécessaire. Si vous ne trouvez pas de source primaire ou institutionnelle permettant de confirmer une affirmation, qualifiez-la d’hallucination potentielle.`;
+
+    const auditResponse = `
+        <p>J’ai réalisé un audit strict de la note en distinguant les erreurs de calcul, les affirmations non vérifiables, les références réglementaires et les biais méthodologiques.</p>
+        <div class="audit-verdict"><strong>Verdict : NON VALIDÉE POUR DIFFUSION.</strong><br>La note contient des erreurs arithmétiques, des sources non vérifiables, une référence réglementaire apparemment inventée et plusieurs raccourcis méthodologiques. Elle ne doit pas servir de base à une décision d’investissement sans reprise de l’analyse, triangulation des sources et validation humaine.</div>
+        <div class="audit-summary"><div class="audit-summary-card"><span class="number">11</span><span class="label">anomalies détectées</span></div><div class="audit-summary-card"><span class="number">5</span><span class="label">constats critiques</span></div><div class="audit-summary-card"><span class="number">0</span><span class="label">décision prête à exécuter</span></div></div>
+        <h3>1. Audit des chiffres</h3><div class="table-wrap"><table class="audit-table"><thead><tr><th>Constat</th><th>Vérification</th><th>Gravité</th><th>Correction</th></tr></thead><tbody>
+        <tr><td><strong>Les valeurs ne totalisent pas 2 040 M€.</strong></td><td>420 + 360 + 310 + 240 + 190 = <strong>1 520 M€</strong>. Le total déclaré est surévalué de 520 M€, soit 34,2 %.</td><td><span class="severity critical">Critique</span></td><td>Remplacer le total par 1 520 M€ et revoir toutes les conclusions qui en dépendent.</td></tr>
+        <tr><td><strong>L’investissement total est mal additionné.</strong></td><td>48 000 € + 27 000 € + 36 000 € = <strong>111 000 €</strong>, et non 96 000 €.</td><td><span class="severity critical">Critique</span></td><td>Mettre à jour le budget, le ROI et le délai de retour.</td></tr>
+        <tr><td><strong>ROI et délai de retour incompatibles.</strong></td><td>Même en acceptant une marge additionnelle non démontrée de 180 000 €, le ROI net serait (180 000 − 111 000) / 111 000 = <strong>62,2 %</strong>. Le délai de retour serait d’environ <strong>7,4 mois</strong>.</td><td><span class="severity critical">Critique</span></td><td>Documenter la formule et chaque hypothèse avant de recalculer.</td></tr></tbody></table></div>
+        <h3>2. Sources et hallucinations potentielles</h3><div class="table-wrap"><table class="audit-table"><thead><tr><th>Affirmation</th><th>Résultat de la vérification</th><th>Gravité</th></tr></thead><tbody>
+        <tr><td>« Observatoire panafricain des investissements énergétiques 2025 » et chiffre de 78 %.</td><td>La note ne fournit ni organisme identifiable, ni méthodologie, ni lien vers une publication primaire. Le chiffre doit être considéré comme une <strong>hallucination potentielle</strong> tant qu’une source vérifiable n’est pas fournie.</td><td><span class="severity high">Élevée</span></td></tr>
+        <tr><td>« Institut euro-africain de compétitivité territoriale » et hausse universelle de 47 %.</td><td>Aucune référence bibliographique, méthodologie ou échantillon n’est indiqué. L’idée qu’un pourcentage unique s’applique à tous les secteurs et à toute une région constitue en outre une généralisation injustifiée.</td><td><span class="severity high">Élevée</span></td></tr></tbody></table></div>
+        <h3>3. Référence réglementaire apparemment inventée</h3><p>La note ne fournit aucun texte primaire permettant d’établir l’existence et la portée de la <strong>« Directive CEDEAO 18/2024 sur l’agrément unique des prestataires énergétiques »</strong>. Une obligation réglementaire ne doit jamais être reprise à partir du seul texte généré par une IA : il faut retrouver le texte officiel, vérifier son champ d’application et, si nécessaire, solliciter une expertise juridique locale.</p>
+        <h3>4. Biais méthodologiques</h3><div class="table-wrap"><table class="audit-table"><thead><tr><th>Recommandation de la note</th><th>Problème</th><th>Action nécessaire</th></tr></thead><tbody>
+        <tr><td>Extrapoler les observations du Sénégal à l’ensemble de l’Afrique de l’Ouest.</td><td>Un marché national ne constitue pas un échantillon représentatif d’une région entière. Les cadres réglementaires, chaînes de valeur, acteurs et conditions concurrentielles doivent être analysés pays par pays.</td><td><span class="severity critical">Corriger</span></td></tr>
+        <tr><td>Privilégier les sources européennes et utiliser les sources locales seulement pour confirmer.</td><td>Cela crée un biais de sélection des sources. Une démarche d’intelligence économique exige de croiser des sources institutionnelles, sectorielles, locales et internationales selon leur fiabilité et leur pertinence, et non selon leur origine.</td><td><span class="severity critical">Corriger</span></td></tr>
+        <tr><td>Assimiler visibilité numérique et influence réelle.</td><td>La présence en ligne peut être un signal, mais elle ne prouve ni le pouvoir de décision, ni la centralité dans un réseau, ni la capacité opérationnelle. Une cartographie d’acteurs nécessite plusieurs indicateurs et une validation croisée.</td><td><span class="severity high">Élevée</span></td></tr></tbody></table></div>
+        <h3>5. Recommandations stratégiques insuffisamment justifiées</h3><ul><li><strong>Déployer sans pilote :</strong> la décision repose sur des chiffres et des sources non validés.</li><li><strong>Présélection automatisée des partenaires :</strong> un score unique ne remplace pas la due diligence, la vérification de réputation, la capacité opérationnelle et l’analyse des parties prenantes.</li><li><strong>« Confiance de l’analyse : 96 % » :</strong> aucun mode de calcul n’est fourni ; il s’agit d’une précision apparente sans méthodologie.</li></ul>
+        <h3>Conclusion corrigée</h3><p>La note peut servir de point de départ pour formuler des hypothèses de travail, mais elle <strong>ne démontre pas</strong> encore l’attractivité du marché, la simplicité réglementaire ni la pertinence d’un déploiement régional. Elle doit être reprise avec des sources primaires, une triangulation explicite, une analyse pays par pays, une cartographie d’acteurs documentée et une revue humaine.</p>
+    `;
+
+    const step1Html = `
+        <p><strong>Vous êtes responsable de ce que vous diffusez, pas l’IA.</strong></p>
+        <p>En intelligence économique, une information erronée peut fausser une recommandation stratégique. Avant d’utiliser une note générée par IA :</p>
+        <div class="guide-subheading">Vérifiez les sources</div><div class="card-list">
+        <div class="card-list-item"><span class="material-symbols-outlined">visibility</span><span>Lisez la note comme un analyste sceptique : distinguez faits, hypothèses et conclusions.</span></div>
+        <div class="card-list-item"><span class="material-symbols-outlined">psychology</span><span>Appliquez votre jugement professionnel et recherchez les raccourcis méthodologiques.</span></div>
+        <div class="card-list-item"><span class="material-symbols-outlined">calculate</span><span>Recalculez les chiffres, les totaux et les ratios.</span></div>
+        <div class="card-list-item"><span class="material-symbols-outlined">search</span><span>Si la note cite la <strong>« Directive CEDEAO 18/2024 »</strong>, recherchez le texte officiel et vérifiez son existence et sa portée.</span></div></div>
+        <div class="paso0-warning"><span class="material-symbols-outlined">warning</span><p>Une affirmation très précise n’est pas nécessairement fiable. Plus une donnée est décisive, plus son niveau de preuve doit être élevé.</p></div>
+        <p style="margin-top:14px;">Soyez également attentif aux biais de méthode : extrapoler un pays à toute une région, privilégier une catégorie de sources ou confondre visibilité et influence peut produire une analyse convaincante mais fragile.</p>
+        <p>Votre rôle consiste à rechercher, vérifier, trianguler et hiérarchiser l’information avant de la transformer en recommandation.</p>
+    `;
+
+    const step2Html = `
+        <p><strong>Ouvrez une nouvelle fenêtre de votre outil</strong> — ChatGPT, Claude, Gemini ou Copilot — et collez la note.</p>
+        <p><strong>Ne lui demandez pas simplement si elle est correcte.</strong> Donnez-lui une consigne d’audit précise.</p>
+        <div class="paso0-warning"><span class="material-symbols-outlined">info</span><p>Dans cette simulation, la note est déjà ouverte dans la conversation ChatGPT. Au lancement de l’audit, seul le prompt sera donc collé.</p></div>
+        <div class="prompt-label"><span class="material-symbols-outlined">terminal</span>Copiez-collez ce prompt :</div><div class="prompt-box" id="auditPromptBox"></div>
+        <button class="copy-btn" id="copyPromptBtn" type="button"><span class="material-symbols-outlined" style="font-size:18px;">content_copy</span>Copier le prompt</button>
+    `;
+
+    const DOM = {
+        wrapper: document.getElementById('simulatorWrapper'),
+        chatContainer: document.getElementById('chatContainer'),
+        promptInput: document.getElementById('promptInput'),
+        mainInputBox: document.getElementById('mainInputBox'),
+        sendButton: document.getElementById('sendButton'),
+        sendIcon: document.getElementById('sendIcon'),
+        pasteToast: document.getElementById('pasteToast'),
+        guidePill: document.getElementById('guidePill'),
+        guideTitle: document.getElementById('guideTitle'),
+        guideContent: document.getElementById('guideContent'),
+        stepIndicator: document.getElementById('stepIndicator'),
+        btnSuivant: document.getElementById('btnSuivant'),
+        simCursor: document.getElementById('simCursor'),
+        plusBtn: document.getElementById('plusBtnTrigger'),
+        plusMenu: document.getElementById('plusDropdown'),
+        altaBtn: document.getElementById('altaBtnTrigger'),
+        altaMenu: document.getElementById('altaDropdown')
+    };
+
+    const chatgptSVG = `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A6.0651 6.0651 0 0 0 19.0192 19.818a5.9847 5.9847 0 0 0 3.9977-2.9001 6.0462 6.0462 0 0 0-.735-7.0968ZM8.7504 6.5593C10.0625 5.4298 11.979 5.234 13.5189 5.8677l-4.1444 7.1596L8.7504 6.5593ZM4.5422 10.3644A4.0153 4.0153 0 0 1 7.218 7.3753l3.149 5.4379-3.414 5.9004a4.0153 4.0153 0 0 1-2.4108-8.3492ZM15.2496 17.4407c-1.3121 1.1295-3.2286 1.3253-4.7685.6916l4.1444-7.1596 1.6241 6.468ZM20.4578 13.6356a4.0153 4.0153 0 0 1-2.6758 2.9891l-3.149-5.4379 3.414-5.9004a4.0153 4.0153 0 0 1 2.4108 8.3492ZM13.0645 10.6033l-1.0645-1.8415-1.0645 1.8415v3.6829l1.0645 1.8415 1.0645-1.8415v-3.6829ZM10.222 15.535l-2.0722-1.1963V9.5492l1.624-2.8122 2.0723 1.1963v4.7895l-1.624 2.8122ZM15.8502 9.5492l-1.624-2.8122 2.0723-1.1963v4.7895l-2.0722 1.1963V9.5492Z"/></svg>`;
+
+    let mode = 'step1';
+    let isAnimating = false;
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function escapeHtml(value) {
+        return value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+            .replace(/\n/g, '<br>');
+    }
+
+    function renderStep1() {
+        mode = 'step1';
+        DOM.guidePill.textContent = 'Défi 2 - Étape 1 sur 2';
+        DOM.guideTitle.textContent = 'Vérifiez les sources';
+        DOM.guideContent.innerHTML = step1Html;
+        DOM.guideContent.scrollTop = 0;
+        DOM.stepIndicator.textContent = '1 / 2';
+        DOM.btnSuivant.textContent = 'J’ai vérifié les informations et les sources';
+        DOM.btnSuivant.disabled = false;
+    }
+
+    function renderStep2() {
+        mode = 'step2';
+        DOM.guidePill.textContent = 'Étape 2 sur 2';
+        DOM.guideTitle.textContent = 'Auditoría con IA';
+        DOM.guideContent.innerHTML = step2Html;
+        const promptBox = document.getElementById('auditPromptBox');
+        if (promptBox) promptBox.textContent = auditPrompt;
+        DOM.guideContent.scrollTop = 0;
+        DOM.stepIndicator.textContent = '2 / 2';
+        DOM.btnSuivant.textContent = 'Auditer la note avec ChatGPT';
+        DOM.btnSuivant.disabled = false;
+    }
+
+    function renderAfterAudit() {
+        mode = 'afterAudit';
+        DOM.guidePill.textContent = 'Étape 2 sur 2';
+        DOM.guideTitle.textContent = 'Revisa la auditoría';
+        DOM.guideContent.innerHTML = `
+            
+            <p>ChatGPT a terminé l’audit. Lisez maintenant le résultat et observez comment il distingue :</p>
+            <div class="card-list">
+                <div class="card-list-item"><span class="material-symbols-outlined">calculate</span><span>Les erreurs numériques susceptibles de modifier le ROI et la décision.</span></div>
+                <div class="card-list-item"><span class="material-symbols-outlined">gavel</span><span>Une référence réglementaire apparemment inventée et des obligations non étayées.</span></div>
+                <div class="card-list-item"><span class="material-symbols-outlined">balance</span><span>Des biais méthodologiques présentés comme s’il s’agissait de conclusions objectives.</span></div>
+                <div class="card-list-item"><span class="material-symbols-outlined">source</span><span>Des sources non vérifiables et des affirmations insuffisamment étayées.</span></div>
+            </div>
+            <div class="paso0-warning">
+                <span class="material-symbols-outlined">verified_user</span>
+                <p>Utiliser une autre IA pour auditer est utile, mais ne supprime pas votre responsabilité. La décision finale exige de vérifier les sources, de trianguler l’information et d’appliquer votre propre jugement.</p>
+            </div>
+        `;
+        DOM.guideContent.scrollTop = 0;
+        DOM.stepIndicator.textContent = '2 / 2';
+        DOM.btnSuivant.textContent = 'Terminer le défi';
+        DOM.btnSuivant.disabled = false;
+    }
+
+    function renderCompleted() {
+        mode = 'completed';
+        DOM.guidePill.textContent = 'Défi terminé';
+        DOM.guideTitle.textContent = 'Has cazado las alucinaciones';
+        DOM.guideContent.innerHTML = `
+            <div class="challenge-label">Défi 2 · Hallucinations et erreurs de l’IA</div>
+            <p>La note paraissait convaincante. Elle comportait pourtant de nombreuses erreurs.</p>
+            <div class="paso0-warning">
+                <span class="material-symbols-outlined">fact_check</span>
+                <p><strong>La fluidité n’est pas une preuve. Les chiffres se recalculent, les textes se vérifient et les biais méthodologiques se détectent.</strong></p>
+            </div>
+            <p style="margin-top:14px;">Vous pouvez relire toute la conversation à gauche ou recommencer l’audit depuis le début.</p>
+        `;
+        DOM.guideContent.scrollTop = 0;
+        DOM.stepIndicator.textContent = '2 / 2';
+        DOM.btnSuivant.textContent = 'Recommencer l’audit';
+        DOM.btnSuivant.disabled = false;
+    }
+
+    function getRelativePoint(element, xRatio = 0.5, yRatio = 0.5) {
+        const elementRect = element.getBoundingClientRect();
+        const wrapperRect = DOM.wrapper.getBoundingClientRect();
+        return {
+            x: elementRect.left - wrapperRect.left + elementRect.width * xRatio,
+            y: elementRect.top - wrapperRect.top + elementRect.height * yRatio
+        };
+    }
+
+    async function moveCursorTo(element, duration, xRatio = 0.5, yRatio = 0.5) {
+        const point = getRelativePoint(element, xRatio, yRatio);
+        DOM.simCursor.style.transitionDuration = `${duration}ms, 180ms`;
+        DOM.simCursor.style.transform = `translate3d(${point.x}px, ${point.y}px, 0)`;
+        await wait(duration + 30);
+    }
+
+    async function clickCursor() {
+        DOM.simCursor.classList.remove('clicking');
+        void DOM.simCursor.offsetWidth;
+        DOM.simCursor.classList.add('clicking');
+        await wait(420);
+        DOM.simCursor.classList.remove('clicking');
+    }
+
+    function pastePrompt() {
+        DOM.promptInput.value = auditPrompt;
+        DOM.promptInput.style.height = '25px';
+        DOM.promptInput.style.height = `${Math.min(DOM.promptInput.scrollHeight, 145)}px`;
+        DOM.sendIcon.textContent = 'arrow_upward';
+        DOM.mainInputBox.classList.add('paste-flash');
+        DOM.pasteToast.classList.add('show');
+        setTimeout(function () {
+            DOM.mainInputBox.classList.remove('paste-flash');
+            DOM.pasteToast.classList.remove('show');
+        }, 720);
+    }
+
+    function addUserAuditMessage() {
+        const userMessage = document.createElement('div');
+        userMessage.className = 'chat-message simulation-message';
+        userMessage.innerHTML = `
+            <div class="user-avatar">U</div>
+            <div class="message-content"><div class="user-prompt-box">${escapeHtml(auditPrompt)}</div></div>
+        `;
+        DOM.chatContainer.appendChild(userMessage);
+        DOM.chatContainer.scrollTop = DOM.chatContainer.scrollHeight;
+    }
+
+    function addThinkingMessage() {
+        const thinking = document.createElement('div');
+        thinking.className = 'chat-message simulation-message';
+        thinking.id = 'tempThinking';
+        thinking.innerHTML = `
+            <div class="chatgpt-avatar">${chatgptSVG}</div>
+            <div class="message-content">
+                <div class="reasoning-box"><span class="material-symbols-outlined">flare</span>ANALYSE DES CHIFFRES, DES SOURCES ET DES BIAIS…</div>
+            </div>
+        `;
+        DOM.chatContainer.appendChild(thinking);
+        DOM.chatContainer.scrollTop = DOM.chatContainer.scrollHeight;
+    }
+
+    function addAuditResponse() {
+        const thinking = document.getElementById('tempThinking');
+        if (thinking) thinking.remove();
+
+        const response = document.createElement('div');
+        response.className = 'chat-message simulation-message';
+        response.innerHTML = `
+            <div class="chatgpt-avatar">${chatgptSVG}</div>
+            <div class="message-content">${auditResponse}</div>
+        `;
+        DOM.chatContainer.appendChild(response);
+        DOM.chatContainer.scrollTop = DOM.chatContainer.scrollHeight;
+    }
+
+    async function simulateAudit() {
+        if (isAnimating) return;
+        isAnimating = true;
+        DOM.btnSuivant.disabled = true;
+        DOM.btnSuivant.textContent = 'Simulando auditoría…';
+
+        const buttonPoint = getRelativePoint(DOM.btnSuivant, 0.18, 0.45);
+        DOM.simCursor.style.transitionDuration = '0ms';
+        DOM.simCursor.style.transform = `translate3d(${buttonPoint.x}px, ${buttonPoint.y}px, 0)`;
+        DOM.simCursor.classList.add('visible');
+        await wait(120);
+
+        await moveCursorTo(DOM.promptInput, 560, 0.55, 0.5);
+        await clickCursor();
+        pastePrompt();
+        await wait(760);
+
+        await moveCursorTo(DOM.sendButton, 500, 0.5, 0.5);
+        await clickCursor();
+        DOM.simCursor.classList.remove('visible');
+
+        addUserAuditMessage();
+        DOM.promptInput.value = '';
+        DOM.promptInput.style.height = '25px';
+        DOM.sendIcon.textContent = 'graphic_eq';
+
+        await wait(180);
+        addThinkingMessage();
+        await wait(2000);
+        addAuditResponse();
+
+        isAnimating = false;
+        renderAfterAudit();
+    }
+
+    function resetSimulation() {
+        DOM.chatContainer.querySelectorAll('.simulation-message').forEach(function (node) { node.remove(); });
+        DOM.chatContainer.scrollTop = 0;
+        DOM.promptInput.value = '';
+        DOM.promptInput.style.height = '25px';
+        DOM.sendIcon.textContent = 'graphic_eq';
+        renderStep1();
+    }
+
+    async function copyPrompt() {
+        const button = document.getElementById('copyPromptBtn');
+        if (!button) return;
+        const original = button.innerHTML;
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(auditPrompt);
+            } else {
+                const fallback = document.createElement('textarea');
+                fallback.value = auditPrompt;
+                fallback.setAttribute('readonly', '');
+                fallback.style.position = 'fixed';
+                fallback.style.opacity = '0';
+                document.body.appendChild(fallback);
+                fallback.select();
+                const copied = document.execCommand('copy');
+                fallback.remove();
+                if (!copied) throw new Error('No se pudo copiar');
+            }
+            button.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">done</span>Prompt copié';
+        } catch (error) {
+            button.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">content_copy</span>Sélectionnez et copiez le texte';
+        }
+        setTimeout(function () { button.innerHTML = original; }, 1600);
+    }
+
+    DOM.btnSuivant.addEventListener('click', function () {
+        if (isAnimating) return;
+        if (mode === 'step1') {
+            renderStep2();
+        } else if (mode === 'step2') {
+            simulateAudit();
+        } else if (mode === 'afterAudit') {
+            renderCompleted();
+        } else if (mode === 'completed') {
+            resetSimulation();
+        }
+    });
+
+    DOM.guideContent.addEventListener('click', function (event) {
+        if (event.target.closest('#copyPromptBtn')) copyPrompt();
+    });
+
+    DOM.plusBtn.addEventListener('click', function (event) {
+        event.stopPropagation();
+        DOM.plusMenu.classList.toggle('show');
+        DOM.altaMenu.classList.remove('show');
+        DOM.altaBtn.classList.remove('active');
+    });
+
+    DOM.altaBtn.addEventListener('click', function (event) {
+        event.stopPropagation();
+        DOM.altaMenu.classList.toggle('show');
+        DOM.altaBtn.classList.toggle('active');
+        DOM.plusMenu.classList.remove('show');
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!DOM.plusBtn.contains(event.target) && !DOM.plusMenu.contains(event.target)) {
+            DOM.plusMenu.classList.remove('show');
+        }
+        if (!DOM.altaBtn.contains(event.target) && !DOM.altaMenu.contains(event.target)) {
+            DOM.altaMenu.classList.remove('show');
+            DOM.altaBtn.classList.remove('active');
+        }
+    });
+
+    renderStep1();
+    DOM.chatContainer.scrollTop = 0;
+});
+</script>
+</body>
+</html>
